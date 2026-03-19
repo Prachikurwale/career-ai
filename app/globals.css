@@ -26,3 +26,27 @@ body {
   background: #bfdbfe;
   color: #0f172a;
 }
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  body.print-roadmap-only * {
+    visibility: hidden !important;
+  }
+
+  body.print-roadmap-only #roadmap-print-root,
+  body.print-roadmap-only #roadmap-print-root * {
+    visibility: visible !important;
+  }
+
+  body.print-roadmap-only #roadmap-print-root {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 24px;
+    background: #ffffff;
+  }
+}

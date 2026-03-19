@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { getTranslation } from "../../lib/i18n";
 import type { LanguageCode } from "../../types/career";
 
@@ -32,7 +32,7 @@ export default function LoadingScreen({ language }: LoadingScreenProps) {
             className="rounded-2xl border border-white bg-white/90 px-4 py-4 text-sm font-semibold text-slate-700 shadow-sm"
           >
             <div className="flex items-center gap-2 text-sky-600">
-              <Sparkles size={16} />
+              
               <span>{item}</span>
             </div>
           </div>

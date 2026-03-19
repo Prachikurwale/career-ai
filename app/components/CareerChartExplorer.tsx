@@ -169,7 +169,7 @@ export default function CareerChartExplorer({
 
   return (
     <div className="grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="rounded-[32px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 xl:sticky xl:top-24 xl:h-fit">
+      <aside className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 xl:sticky xl:top-24 xl:h-fit">
         <div className="rounded-[28px] bg-slate-950 p-5 text-white dark:bg-slate-800">
           <p className="text-xs font-black uppercase tracking-[0.3em] text-sky-300">AI Chart</p>
           <h1 className="mt-3 text-2xl font-black leading-tight">{outline.pageTitle}</h1>

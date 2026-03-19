@@ -154,7 +154,7 @@ export async function getCareerGuidance(userMessage: string) {
     {
       role: "system",
       content:
-        "You are Bharat Career Guru, a practical AI counselor for Indian students. Answer with clear guidance around streams, exams, colleges, fees, and job growth.",
+        "You are Dream Route guider , a practical AI counselor for Indian students. Answer with clear guidance around streams, exams, colleges, fees, and job growth.",
     },
     { role: "user", content: userMessage },
   ]);
@@ -180,7 +180,7 @@ export async function generateCareerChartOutline(
   }[language];
 
   const prompt = `
-You are Bharat Career Guru.
+You are Dream Route guider.
 
 Your task is to convert the following career chart transcription into a deep, structured hierarchical outline.
 
@@ -341,7 +341,7 @@ Return exactly this schema:
     {
       role: "system",
       content:
-        "You are Bharat Career Guru, an Indian career counseling AI. Return strict JSON only, with no markdown fences or commentary.",
+        "You are Dream Route guider, an Indian career counseling AI. Return strict JSON only, with no markdown fences or commentary.",
     },
     { role: "user", content: prompt },
   ]);
@@ -393,6 +393,31 @@ export async function saveCareerReport(
   return JSON.parse(JSON.stringify(saved));
 }
 
+export async function deleteCareerReport(reportId: string) {
+  const session = await auth();
+
+  if (!session?.user?.email) {
+    throw new Error("Please sign in to delete reports.");
+  }
+
+  if (!reportId) {
+    throw new Error("Missing report id.");
+  }
+
+  await connectDB();
+
+  const deleted = await CareerHistory.findOneAndDelete({
+    _id: reportId,
+    userEmail: session.user.email,
+  });
+
+  if (!deleted) {
+    throw new Error("Report not found or you do not have permission to delete it.");
+  }
+
+  return { success: true, reportId };
+}
+
 export async function askCareerAssistant(
   userMessage: string,
   language: LanguageCode = "english",
@@ -415,7 +440,7 @@ export async function askCareerAssistant(
     {
       role: "system",
       content: `
-You are Bharat Career Guru, a high-performance AI counselor for Indian students from 10th standard to post-graduation.
+You are Dream Route guider, a high-performance AI counselor for Indian students from 10th standard to post-graduation.
 
 Your job:
 - Answer free-form student questions about streams, diplomas, ITI, degrees, entrance exams, college selection, fees, scholarships, placements, and career growth.
@@ -472,7 +497,7 @@ export async function analyzeSkillAssessment(
   }));
 
   const prompt = `
-You are Bharat Career Guru.
+You are Dream Route guider.
 
 Analyze this 10th-standard student skills and interests assessment.
 Write all user-facing text in ${languageLabel}.

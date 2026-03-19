@@ -32,13 +32,14 @@ export default async function Page({ searchParams }: DashboardPageProps) {
     "english";
 
   return (
-    <main className="h-[calc(100vh-4.75rem)] overflow-hidden bg-transparent p-0">
+    <main className="h-[calc(100vh-4.75rem)] overflow-hidden bg-[linear-gradient(180deg,#f5e7fa_0%,#efd9f7_45%,#ead0f6_100%)] p-0 dark:bg-[linear-gradient(180deg,#150d1b_0%,#1c1024_48%,#140d1c_100%)]">
       <div className="h-full max-w-none">
         <DashboardClient
           initialReports={initialReports}
           initialLanguage={initialLanguage}
           userName={session.user.name}
           userImage={session.user.image}
+          userEmail={session.user.email}
         />
       </div>
     </main>

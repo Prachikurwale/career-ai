@@ -6,12 +6,13 @@ import { useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
-  Bot,
   House,
   LayoutDashboard,
   LogOut,
+  Trash2,
   ReceiptText,
 } from "lucide-react";
+import BotMascotIcon from "./BotMascotIcon";
 import CareerChatbot from "./CareerChatbot";
 import LoadingScreen from "./LoadingScreen";
 import PathSelector from "./PathSelector";
@@ -32,6 +33,7 @@ import {
 } from "../../lib/i18n";
 import {
   analyzeSkillAssessment,
+  deleteCareerReport,
   generateCareerReport,
   saveCareerReport,
 } from "../../actions/career-ai";
@@ -42,6 +44,7 @@ type DashboardClientProps = {
   initialReports: SavedCareerReport[];
   userName?: string | null;
   userImage?: string | null;
+  userEmail?: string | null;
   initialLanguage: LanguageCode;
 };
 
@@ -139,6 +142,7 @@ export default function DashboardClient({
   initialReports,
   userName,
   userImage,
+  userEmail,
   initialLanguage,
 }: DashboardClientProps) {
   const router = useRouter();
@@ -157,6 +161,7 @@ export default function DashboardClient({
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, startGenerate] = useTransition();
   const [isSaving, startSave] = useTransition();
+  const [isDeleting, startDelete] = useTransition();
   const [isAssessing, startAssessment] = useTransition();
   const [sidebarTab, setSidebarTab] = useState<"dashboard" | "saved" | "chat">("dashboard");
   const [showAssessment, setShowAssessment] = useState(false);
@@ -302,9 +307,89 @@ export default function DashboardClient({
     setStep(4);
   };
 
+  const handleDeleteReport = (reportId: string) => {
+    startDelete(async () => {
+      try {
+        await deleteCareerReport(reportId);
+        setReports((current) => current.filter((report) => report._id !== reportId));
+
+        if (activeSavedId === reportId) {
+          setActiveSavedId(null);
+          setGeneratedReport(null);
+        }
+      } catch (caughtError) {
+        setError(
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Could not delete the saved report right now.",
+        );
+      }
+    });
+  };
+
   const handleExport = () => {
     if (typeof window !== "undefined") {
-      window.print();
+      const roadmapRoot = document.getElementById("roadmap-print-root");
+
+      if (!roadmapRoot) {
+        window.print();
+        return;
+      }
+
+      const printWindow = window.open("", "_blank", "width=1100,height=900");
+
+      if (!printWindow) {
+        window.print();
+        return;
+      }
+
+      const headMarkup = Array.from(document.head.querySelectorAll("style, link[rel='stylesheet']"))
+        .map((node) => node.outerHTML)
+        .join("\n");
+
+      printWindow.document.open();
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <title>DreamRoute Roadmap</title>
+            ${headMarkup}
+            <style>
+              html, body {
+                margin: 0;
+                padding: 0;
+                background: #ffffff;
+              }
+
+              body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                color: #0f172a;
+              }
+
+              .print-shell {
+                padding: 24px;
+              }
+
+              @page {
+                size: auto;
+                margin: 14mm;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="print-shell">${roadmapRoot.outerHTML}</div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+
+      window.setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 300);
     }
   };
 
@@ -376,33 +461,38 @@ export default function DashboardClient({
   };
 
   return (
-    <div className="h-[calc(100vh-4.75rem)] overflow-hidden bg-[#efd9f7] dark:bg-[#150d1b]">
-      <div className="grid h-full md:grid-cols-[182px_minmax(0,1fr)]">
-        <aside className="flex h-full flex-col overflow-y-auto border-r border-black/10 bg-[#d9d9d9] px-4 py-4 dark:border-white/10 dark:bg-slate-900">
+    <div className="h-[calc(100vh-4.75rem)] overflow-hidden bg-[radial-gradient(circle_at_bottom_right,_rgba(216,180,254,0.18),_transparent_30%),linear-gradient(180deg,#f5e7fa_0%,#efd9f7_45%,#ead0f6_100%)] dark:bg-[radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.08),_transparent_30%),linear-gradient(180deg,#150d1b_0%,#1c1024_48%,#140d1c_100%)]">
+      <div className="grid h-[calc(100vh-4.75rem)] min-h-0 items-stretch md:grid-cols-[290px_minmax(0,1fr)]">
+        <aside className="flex h-full min-h-0 flex-col overflow-y-auto border-r border-black/10 bg-[#0a7b81] px-4 py-4 dark:border-white/10 dark:bg-[#0f5d61] ">
           <div className="flex flex-col items-center">
             {userImage ? (
               <Image
                 src={userImage}
                 alt={displayName}
-                width={72}
-                height={72}
-                className="h-[72px] w-[72px] rounded-full border-2 border-black object-cover dark:border-white"
+                width={67}
+                height={67}
+                className="h-[67px] w-[67px] rounded-full   object-cover dark:border-white"
               />
             ) : (
-              <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-2 border-black bg-white text-2xl font-black text-black dark:border-white dark:bg-slate-800 dark:text-white">
+              <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-2 border-black bg-white text-2xl font-black text-white dark:border-white dark:bg-slate-800 dark:text-white">
                 {displayName.charAt(0).toUpperCase()}
               </div>
             )}
-            <p className="mt-2 text-center text-[17px] font-bold text-black dark:text-white">
+            <p className="mt-2 text-center text-[19px] font-bold text-white dark:text-white">
               {displayName}
             </p>
-            <div className="mt-3 w-full border-t border-black/60 dark:border-white/60" />
+            {userEmail ? (
+              <p className="mt-1 break-all text-center text-[14px] font-medium text-white dark:text-white/80">
+                {userEmail}
+              </p>
+            ) : null}
+            <div className="mt-3 w-full border-t border-black/40 dark:border-white/40" />
           </div>
 
           <div className="mt-8 space-y-3">
             <Link
               href="/"
-              className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-[15px] text-black/80 transition-all duration-200 hover:bg-white/45 hover:text-black dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
+              className="flex w-full items-center gap-3 font-semibold rounded-xl px-2 py-2 text-left text-[16px] text-white transition-all duration-200 hover:bg-[#04b8b5] hover:text-white dark:text-white/80 dark:hover:bg-[#329d9c] dark:hover:text-slate-950"
             >
               <House className="h-5 w-5" />
               <span>Home</span>
@@ -411,10 +501,10 @@ export default function DashboardClient({
             <button
               type="button"
               onClick={resetToDashboard}
-              className={`flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-[15px] transition-all duration-200 ${
+              className={`flex w-full items-center gap-3 font-semibold rounded-xl px-2 py-2 text-left text-[16px] transition-all duration-200 ${
                 sidebarTab === "dashboard"
-                  ? "bg-white/55 font-semibold text-black shadow-sm dark:bg-white/10 dark:text-white"
-                  : "text-black/80 hover:bg-white/45 hover:text-black dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
+                  ? "bg-white/55 font-bold text-white shadow-sm dark:bg-white/10 dark:text-white"
+                  : "text-white hover:bg-[#04b8b5] hover:text-white dark:text-white/80 dark:hover:bg-[#04b8b5] dark:hover:text-slate-950"
               }`}
             >
               <LayoutDashboard size={16} />
@@ -424,43 +514,43 @@ export default function DashboardClient({
             <button
               type="button"
               onClick={openSavedReports}
-              className={`flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-[15px] transition-all duration-200 ${
+              className={`flex w-full items-center font-semibold gap-3 rounded-xl px-2 py-2 text-left text-[16px] transition-all duration-200 ${
                 sidebarTab === "saved"
-                  ? "bg-white/55 font-semibold text-[#ff3a33] shadow-sm dark:bg-white/10"
-                  : "text-black/80 hover:bg-white/45 hover:text-black dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
+                  ? "bg-white/55   font-bold text-white shadow-sm dark:bg-white/10"
+                  : "text-white hover:bg-[#04b8b5] hover:text-white dark:text-white/80 dark:hover:bg-[#04b8b5] dark:hover:text-slate-950"
               }`}
             >
               <ReceiptText className="h-5 w-5" />
-              <span className={sidebarTab === "saved" ? "text-[#ff3a33]" : ""}>save report</span>
+              <span className={sidebarTab === "saved" ? "text-white" : ""}>Saved Reports</span>
             </button>
 
           </div>
 
           <div className="mt-auto pt-10">
-            <div className="mb-4 w-full border-t border-white/70 dark:border-white/15" />
+            <div className="mb-4 w-full border-t border-white/30 dark:border-white/15" />
 
             <form action={signOutToHome}>
-              <button className="flex items-center gap-2 text-[18px] text-[#ff3a33] transition hover:opacity-80">
-                <LogOut className="h-6 w-6 text-black dark:text-white" />
+              <button className="flex items-center gap-2 text-[17px] text-red-600 font-bold transition hover:opacity-90">
+                <LogOut className="h-6 w-6 text-red-600 font-bold dark:text-white" />
                 <span>Logout</span>
               </button>
             </form>
           </div>
         </aside>
 
-        <section className="h-full overflow-y-auto px-5 py-5 md:px-7">
+        <section className="h-[calc(100vh-4.75rem)] min-h-0 overflow-y-auto px-5 py-5 md:px-7">
           {showBack ? (
             <button
               type="button"
               onClick={handleBack}
-              className="mb-3 inline-flex items-center text-black transition hover:opacity-80 dark:text-white"
+              className="mb-3 inline-flex items-center text-pink-600 transition hover:opacity-80 dark:text-white"
               aria-label="Go back"
             >
-              <ArrowLeft className="h-12 w-12" strokeWidth={2.2} />
+              <ArrowLeft className="h-5 w-5" strokeWidth={2.2} />
             </button>
           ) : null}
 
-          <div className="min-h-full w-full rounded-none border border-[#ead8f4] bg-[#f7e8fb] p-6 shadow-[0_1px_0_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#221328] md:p-8">
+          <div className="min-h-full w-full rounded-none bg-[linear-gradient(180deg,#f5e7fa_0%,#efd9f7_45%,#ead0f6_100%)] p-6 shadow-[0_1px_0_rgba(15,23,42,0.06)] dark:bg-[linear-gradient(180deg,#150d1b_0%,#1c1024_48%,#140d1c_100%)] md:p-8">
             {sidebarTab === "dashboard" && step === 1 ? (
               <div className="space-y-6">
                 <h1 className="text-4xl font-black text-[#111827] dark:text-white">
@@ -486,7 +576,7 @@ export default function DashboardClient({
             {sidebarTab === "dashboard" && step === 2 ? (
               showAssessment && selection.levelId === "10th" ? (
                 <div className="space-y-6">
-                  <div className="rounded-[24px] border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                  <div className="rounded-none border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
                     <h2 className="text-3xl font-black text-[#111827] dark:text-white">
                       Skills & Interest Assessment
                     </h2>
@@ -684,25 +774,40 @@ export default function DashboardClient({
 
                 <div className="grid gap-4 md:grid-cols-2">
                   {reports.map((report) => (
-                    <button
+                    <div
                       key={report._id}
-                      type="button"
-                      onClick={() => openSavedReport(report)}
-                      className="rounded-[22px] border border-[#dfe5ef] bg-white p-5 text-left transition hover:-translate-y-0.5 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                      className="rounded-[2px] border border-[#dfe5ef] bg-white p-5 transition hover:-translate-y-0.5 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
                     >
-                      <p className="text-2xl font-black text-[#111827] dark:text-white">
-                        {report.specializationName}
-                      </p>
-                      <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-                        {report.levelLabel}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-                        {report.pathName}
-                      </p>
-                      <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
-                        {new Date(report.createdAt).toLocaleDateString("en-GB")}
-                      </p>
-                    </button>
+                      <div className="flex items-start justify-between gap-3">
+                        <button
+                          type="button"
+                          onClick={() => openSavedReport(report)}
+                          className="flex-1 text-left"
+                        >
+                          <p className="text-2xl font-black text-[#111827] dark:text-white">
+                            {report.specializationName}
+                          </p>
+                          <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+                            {report.levelLabel}
+                          </p>
+                          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                            {report.pathName}
+                          </p>
+                          <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
+                            {new Date(report.createdAt).toLocaleDateString("en-GB")}
+                          </p>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteReport(report._id)}
+                          disabled={isDeleting}
+                          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-rose-200 text-rose-600 transition hover:bg-rose-50 disabled:opacity-60 dark:border-rose-900/50 dark:text-rose-300 dark:hover:bg-rose-950/30"
+                          aria-label="Delete saved report"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -740,7 +845,7 @@ export default function DashboardClient({
             ) : null}
 
             {sidebarTab === "saved" && !reports.length ? (
-              <div className="rounded-[24px] border border-dashed border-[#dfe5ef] bg-white p-10 text-center dark:border-slate-800 dark:bg-slate-900">
+              <div className="rounded-[24px] border border-dashed border-[#dfe5ef] bg-white p-7 text-center dark:border-slate-800 dark:bg-slate-900">
                 <p className="text-lg font-semibold text-slate-700 dark:text-slate-200">
                   No saved reports yet
                 </p>
@@ -748,13 +853,8 @@ export default function DashboardClient({
             ) : null}
 
             {sidebarTab === "chat" ? (
-              <div className="space-y-6">
-                <div className="rounded-[24px] border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-                  <h2 className="text-4xl font-black text-[#111827] dark:text-white">AI Chat</h2>
-                  <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-                    Ask about careers, colleges, streams, exams, fees, and next steps.
-                  </p>
-                </div>
+              <div className="space-y-3">
+               
                 <CareerChatbot language={language} />
               </div>
             ) : null}
@@ -762,14 +862,19 @@ export default function DashboardClient({
         </section>
       </div>
 
-      <button
-        type="button"
-        onClick={openChat}
-        className="fixed right-5 top-1/2 z-40 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-[#111827] text-white shadow-lg transition hover:scale-105 hover:opacity-95 dark:bg-slate-800 animate-pulse"
-        aria-label="Open AI chat"
-      >
-        <Bot className="h-6 w-6" />
-      </button>
+      <div className="group fixed right-5 top-1/2 z-40 -translate-y-1/2">
+        <div className="pointer-events-none absolute right-16 top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-full bg-[#329d9c] px-4 py-2 text-sm font-semibold text-white opacity-0 shadow-lg transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 dark:bg-[#329d9c]">
+        Get guidance based on your goals and education
+        </div>
+        <button
+          type="button"
+          onClick={openChat}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-[#329d9c] text-white shadow-lg transition hover:scale-105 hover:opacity-95 dark:bg-slate-800 animate-pulse"
+          aria-label="Open AI chat"
+        >
+          <BotMascotIcon className="h-8 w-8" />
+        </button>
+      </div>
     </div>
   );
 }

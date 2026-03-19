@@ -1,4 +1,4 @@
-# Bharat Career Guru
+#Dream Route guider
 
 AI-powered career counseling platform for Indian students built with Next.js, Auth.js, MongoDB, and NVIDIA Llama.
 

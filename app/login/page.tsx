@@ -85,7 +85,7 @@ export default async function LoginPage() {
                   </label>
                   <button
                     type="button"
-                    className="text-sm font-semibold text-blue-600 transition hover:text-blue-700"
+                    className="text-sm font-semibold text-[#329d9c] transition hover:text-[#056e6d]"
                   >
                     Forgot?
                   </button>
@@ -104,7 +104,7 @@ export default async function LoginPage() {
 
               <button
                 type="submit"
-                className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#216be9] text-lg font-extrabold text-white shadow-[0_14px_24px_rgba(33,107,233,0.28)] transition hover:bg-[#1558d6]"
+                className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#329d9c] text-lg font-extrabold text-white shadow-[0_14px_24px_rgba(33,107,233,0.28)] transition hover:bg-[#0a8583]"
               >
                 <span>Sign In</span>
                 <ArrowRight className="h-5 w-5" />
@@ -120,7 +120,7 @@ export default async function LoginPage() {
             <form action={signInToDashboard} className="mt-6">
               <button
                 type="submit"
-                className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white text-base font-bold text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+                className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white text-base font-bold text-slate-700 transition hover:border-[#066e6d] hover:text-[#329d9c] dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
               >
                 <GoogleBadge />
                 <span>Continue with Google</span>
@@ -129,7 +129,7 @@ export default async function LoginPage() {
           </div>
         </section>
 
-        <aside className="relative overflow-hidden bg-[#216be9] px-6 py-10 text-white sm:px-10 lg:px-12">
+        <aside className="relative overflow-hidden bg-[#329d9c] px-6 py-10 text-white sm:px-10 lg:px-12">
           <div
             className="absolute inset-0 opacity-20"
             style={{
@@ -146,7 +146,7 @@ export default async function LoginPage() {
                 <h2 className="text-4xl font-black leading-tight sm:text-5xl">
                   New to CareerPath?
                 </h2>
-                <p className="text-lg leading-8 text-blue-100">
+                <p className="text-lg leading-8 text-[#010320]">
                   Join over 100,000+ professionals finding their next big break. Create your
                   profile and get personalized job recommendations today.
                 </p>
@@ -168,12 +168,12 @@ export default async function LoginPage() {
               <form action={signInToDashboard}>
                 <button
                   type="submit"
-                  className="flex h-14 w-full items-center justify-center rounded-2xl bg-white px-6 text-lg font-extrabold text-[#216be9] transition hover:bg-blue-50"
+                  className="flex h-14 w-full items-center justify-center rounded-2xl bg-white px-6 text-lg font-extrabold text-[#329d9c]  hover:text-[#ffffff] transition hover:bg-[#029491]"
                 >
                   Create Free Account
                 </button>
               </form>
-              <p className="mx-auto mt-5 max-w-sm text-center text-sm leading-6 text-blue-100">
+              <p className="mx-auto mt-5 max-w-sm text-center text-sm leading-6 text-[#050232]">
                 By signing up, you agree to our Terms of Service and Privacy Policy.
               </p>
             </div>

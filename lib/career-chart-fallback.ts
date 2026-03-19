@@ -1,7 +1,7 @@
 import type { CareerChartOutline } from "../types/career-chart";
 
 export const careerChartFallbackOutline: CareerChartOutline = {
-  pageTitle: "Bharat Career Guru",
+  pageTitle: "Dream Route guider",
   pageSubtitle: "Your Complete Indian Career Hierarchy",
   note: "Explore education paths from 10th standard through postgraduate studies and professional growth.",
   sections: [

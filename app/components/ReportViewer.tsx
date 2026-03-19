@@ -51,8 +51,8 @@ export default function ReportViewer({
   const t = getTranslation(language);
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-[36px] bg-slate-950 p-8 text-white shadow-xl dark:bg-slate-800">
+    <div id="roadmap-print-root" className="space-y-6 print:space-y-4">
+      <section className="rounded-[36px] bg-[#1f011c] p-8 text-white shadow-xl dark:bg-slate-800 print:rounded-none print:bg-slate-950 print:p-0 print:shadow-none">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.35em] text-sky-300">
@@ -67,7 +67,7 @@ export default function ReportViewer({
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3 print:hidden">
             {onSave ? (
               <button
                 type="button"
@@ -92,8 +92,8 @@ export default function ReportViewer({
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
-        <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr] print:grid-cols-1">
+        <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 print:break-inside-avoid print:rounded-[24px] print:shadow-none">
           <div className="flex items-center gap-2 text-sky-700">
             <GraduationCap size={18} />
             <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{t.semesterBreakdown}</h3>
@@ -118,7 +118,7 @@ export default function ReportViewer({
         </section>
 
         <div className="space-y-6">
-          <section className="rounded-[30px] border border-emerald-100 bg-emerald-50 p-6 shadow-sm">
+          <section className="rounded-[30px] border border-emerald-100 bg-emerald-50 p-6 shadow-sm print:break-inside-avoid print:rounded-[24px] print:shadow-none">
             <div className="flex items-center gap-2 text-emerald-700">
               <IndianRupee size={18} />
               <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{t.feesAndSalary}</h3>
@@ -143,9 +143,9 @@ export default function ReportViewer({
             </div>
           </section>
 
-          <section className="rounded-[30px] border border-sky-100 bg-sky-50 p-6 shadow-sm">
+          <section className="rounded-[30px] border border-sky-100 bg-sky-50 p-6 shadow-sm print:break-inside-avoid print:rounded-[24px] print:shadow-none">
             <div className="flex items-center gap-2 text-sky-700">
-              <Sparkles size={18} />
+              
               <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{t.skillSynergy}</h3>
             </div>
             <div className="mt-5 space-y-4 text-sm leading-7 text-slate-700 dark:text-slate-300">
@@ -170,7 +170,7 @@ export default function ReportViewer({
       <ListBlock title={t.careerOpportunities} items={report.career_opportunities} />
       <ListBlock title={t.skillsRequired} items={report.skills_required} />
 
-      <section className="rounded-[28px] border border-amber-100 bg-amber-50 p-6 shadow-sm">
+      <section className="rounded-[28px] border border-amber-100 bg-amber-50 p-6 shadow-sm print:break-inside-avoid print:shadow-none">
         <div className="flex items-center gap-2 text-amber-700">
           <Route size={18} />
           <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{t.growthPath}</h3>
@@ -187,7 +187,7 @@ export default function ReportViewer({
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 print:break-inside-avoid print:shadow-none">
         <div className="flex items-center gap-2 text-violet-700">
           <Lightbulb size={18} />
           <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{t.howToUse}</h3>

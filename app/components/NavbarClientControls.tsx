@@ -42,7 +42,7 @@ export default function NavbarClientControls({
       {showDashboard ? (
         <Link
           href={`/dashboard?lang=${language}`}
-          className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700"
+          className="inline-flex items-center gap-2 rounded-full bg-[#329d9c] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#108c8a]"
         >
           <LayoutDashboard size={16} />
           <span>Dashboard</span>
@@ -50,9 +50,9 @@ export default function NavbarClientControls({
       ) : null}
 
       {showLanguage ? (
-        <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 dark:border-slate-700 dark:bg-slate-900">
+        <div className="flex items-center gap-2 rounded-2xl border border-[#329d9c] bg-white px-2 py-1.3 dark:border-slate-700 dark:bg-slate-900">
           <Globe className="h-4 w-4 text-pink-500 dark:text-slate-300" />
-          <LanguageDropdown value={language} onChange={updateLanguage} className="border-0 px-1 py-1" />
+          <LanguageDropdown value={language} onChange={updateLanguage} className="border-0 px-1 py-1  " />
         </div>
       ) : null}
 
@@ -61,7 +61,7 @@ export default function NavbarClientControls({
       {showLogin ? (
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700"
+          className="inline-flex items-center gap-2 rounded-full bg-[#329d9c] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#2a8483]"
         >
            
           <span>Login</span>
@@ -70,8 +70,8 @@ export default function NavbarClientControls({
 
       {!isLoggedIn && pathname === "/login" ? (
         <form action={signInToDashboard}>
-          <button className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700">
-            <LogIn size={16} />
+          <button className="inline-flex items-center gap-2 rounded-full bg-[#329d9c] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#068582]">
+         
             <span>Login</span>
           </button>
         </form>

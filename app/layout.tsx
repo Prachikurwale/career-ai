@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import { Providers } from "./components/Providers";
 
 export const metadata: Metadata = {
-  title: "CareerAI",
+  title: "Dream Route",
   description:
     "AI-powered career counseling platform for Indian students with drill-down path selection and structured career reports.",
 };
