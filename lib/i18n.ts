@@ -133,7 +133,7 @@ const strings: Record<LanguageCode, DashboardStrings> = {
     chatDescription: "Free-form guidance for streams, exams, fees, colleges, placements, and career fit.",
     chatStatus: "Live AI guidance",
     askPlaceholder: "Ask about colleges, fees, exams, salaries, or best path for your goals...",
-     
+    send: "Send",
     aiCounselor: "AI Counselor",
     you: "You",
     aiThinking: "AI Thinking",

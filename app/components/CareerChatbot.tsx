@@ -117,7 +117,7 @@ export default function CareerChatbot({
 
       <div
         className={`mt-6 space-y-4 rounded-[28px] bg-slate-50 p-4 dark:bg-[#329d9c] ${
-          compact ? "max-h-[340px] overflow-y-auto" : "md:p-5"
+          compact ? "max-h-85 overflow-y-auto" : "md:p-5"
         }`}
       >
         {messages.map((message, index) => {
