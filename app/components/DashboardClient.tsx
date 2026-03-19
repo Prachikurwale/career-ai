@@ -7,10 +7,9 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   Bot,
-  Grid2x2,
   House,
+  LayoutDashboard,
   LogOut,
-  MessageCircleMore,
   ReceiptText,
 } from "lucide-react";
 import CareerChatbot from "./CareerChatbot";
@@ -31,7 +30,11 @@ import {
   localizeCareerSpecialization,
   parseLanguageCode,
 } from "../../lib/i18n";
-import { generateCareerReport, saveCareerReport } from "../../actions/career-ai";
+import {
+  analyzeSkillAssessment,
+  generateCareerReport,
+  saveCareerReport,
+} from "../../actions/career-ai";
 import { signOutToHome } from "@/actions/auth";
 import type { CareerReport, LanguageCode, SavedCareerReport } from "../../types/career";
 
@@ -47,6 +50,90 @@ type SelectionState = {
   pathId: string;
   specializationId: string;
 };
+
+type AssessmentQuestion = {
+  id: string;
+  question: string;
+  options: string[];
+};
+
+const assessmentQuestions: AssessmentQuestion[] = [
+  {
+    id: "hands_on",
+    question: "Which activity do you enjoy most?",
+    options: [
+      "Fixing or building things",
+      "Designing posters or visuals",
+      "Helping and caring for people",
+      "Using computers and the internet",
+    ],
+  },
+  {
+    id: "school_subject",
+    question: "Which school subject feels easiest for you?",
+    options: ["Maths / Science", "Drawing / Arts", "Biology / Health", "Computer / English"],
+  },
+  {
+    id: "work_style",
+    question: "What kind of work style suits you?",
+    options: [
+      "Practical field work",
+      "Creative studio work",
+      "Service and public-facing work",
+      "Office or digital work",
+    ],
+  },
+  {
+    id: "career_goal",
+    question: "What matters most in your career?",
+    options: ["Technical skills", "Creativity", "Helping society", "Early job opportunity"],
+  },
+  {
+    id: "environment",
+    question: "Where would you like to work?",
+    options: ["Workshop / industry", "Studio / media", "Hospital / public service", "Office / online"],
+  },
+  {
+    id: "comfort",
+    question: "What are you most comfortable with?",
+    options: ["Machines and tools", "Colors and ideas", "People and care", "Apps and computers"],
+  },
+  {
+    id: "future_plan",
+    question: "What kind of future do you see?",
+    options: [
+      "Diploma or technical degree",
+      "Creative professional course",
+      "Government or defense path",
+      "Skill course and fast employment",
+    ],
+  },
+  {
+    id: "strength",
+    question: "What is your biggest strength?",
+    options: ["Problem solving", "Imagination", "Discipline", "Communication"],
+  },
+  {
+    id: "learning_style",
+    question: "How do you learn best?",
+    options: [
+      "By doing practical tasks",
+      "By creating and presenting",
+      "By observing and serving",
+      "By using digital tools",
+    ],
+  },
+  {
+    id: "job_choice",
+    question: "Which job sounds more interesting?",
+    options: [
+      "Engineer / technician",
+      "Designer / photographer",
+      "Police / nurse / army",
+      "Digital marketer / computer operator",
+    ],
+  },
+];
 
 export default function DashboardClient({
   initialReports,
@@ -70,7 +157,17 @@ export default function DashboardClient({
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, startGenerate] = useTransition();
   const [isSaving, startSave] = useTransition();
+  const [isAssessing, startAssessment] = useTransition();
   const [sidebarTab, setSidebarTab] = useState<"dashboard" | "saved" | "chat">("dashboard");
+  const [showAssessment, setShowAssessment] = useState(false);
+  const [assessmentAnswers, setAssessmentAnswers] = useState<Record<string, string>>({});
+  const [assessmentResult, setAssessmentResult] = useState<{
+    primaryRecommendation: { pathId: string; title: string; reason: string };
+    summary: string;
+    strengths: string[];
+    recommendedPaths: Array<{ pathId: string; title: string; reason: string }>;
+    nextStep: string;
+  } | null>(null);
   const searchParamsString = searchParams.toString();
   const language = parseLanguageCode(searchParams.get("lang")) ?? preferredLanguage;
 
@@ -92,7 +189,8 @@ export default function DashboardClient({
   const visibleReport = generatedReport ?? activeSavedReport?.report ?? null;
   const showSavedList = sidebarTab === "saved" && !activeSavedId && !generatedReport;
   const showReport = step === 4 && Boolean(visibleReport);
-  const showBack = step > 1 || sidebarTab === "saved" || sidebarTab === "chat" || activeSavedId !== null;
+  const showBack =
+    step > 1 || sidebarTab === "saved" || sidebarTab === "chat" || activeSavedId !== null || showAssessment;
 
   const applyLanguage = (nextLanguage: LanguageCode) => {
     setPreferredLanguage(nextLanguage);
@@ -107,6 +205,9 @@ export default function DashboardClient({
     setGeneratedReport(null);
     setActiveSavedId(null);
     setError(null);
+    setShowAssessment(false);
+    setAssessmentAnswers({});
+    setAssessmentResult(null);
     setSelection({ levelId: "", pathId: "", specializationId: "" });
     setStep(1);
   };
@@ -124,6 +225,7 @@ export default function DashboardClient({
     setGeneratedReport(null);
     setActiveSavedId(null);
     setError(null);
+    setShowAssessment(false);
   };
 
   const handleLevelSelect = (levelId: string) => {
@@ -132,14 +234,26 @@ export default function DashboardClient({
     setGeneratedReport(null);
     setActiveSavedId(null);
     setError(null);
+    setShowAssessment(false);
+    setAssessmentAnswers({});
+    setAssessmentResult(null);
     setStep(2);
   };
 
   const handlePathSelect = (pathId: string) => {
+    if (pathId === "skills-assessment-10th") {
+      setShowAssessment(true);
+      setAssessmentAnswers({});
+      setAssessmentResult(null);
+      setError(null);
+      return;
+    }
+
     setSelection((current) => ({ ...current, pathId, specializationId: "" }));
     setGeneratedReport(null);
     setActiveSavedId(null);
     setError(null);
+    setShowAssessment(false);
     setStep(3);
   };
 
@@ -195,6 +309,13 @@ export default function DashboardClient({
   };
 
   const handleBack = () => {
+    if (showAssessment) {
+      setShowAssessment(false);
+      setAssessmentAnswers({});
+      setAssessmentResult(null);
+      return;
+    }
+
     if (activeSavedId) {
       setActiveSavedId(null);
       setGeneratedReport(null);
@@ -226,6 +347,32 @@ export default function DashboardClient({
     if (step === 2) {
       setStep(1);
     }
+  };
+
+  const submitAssessment = () => {
+    if (assessmentQuestions.some((question) => !assessmentAnswers[question.id])) {
+      setError("Please answer all assessment questions first.");
+      return;
+    }
+
+    setError(null);
+
+    const answerLines = assessmentQuestions.map(
+      (question) => `${question.question}: ${assessmentAnswers[question.id]}`,
+    );
+
+    startAssessment(async () => {
+      try {
+        const result = await analyzeSkillAssessment(answerLines, language);
+        setAssessmentResult(result);
+      } catch (caughtError) {
+        setError(
+          caughtError instanceof Error
+            ? caughtError.message
+            : "Could not analyze the assessment right now.",
+        );
+      }
+    });
   };
 
   return (
@@ -270,7 +417,7 @@ export default function DashboardClient({
                   : "text-black/80 hover:bg-white/45 hover:text-black dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
               }`}
             >
-              <Grid2x2 className="h-5 w-5" />
+              <LayoutDashboard size={16} />
               <span>Dashboard</span>
             </button>
 
@@ -287,18 +434,6 @@ export default function DashboardClient({
               <span className={sidebarTab === "saved" ? "text-[#ff3a33]" : ""}>save report</span>
             </button>
 
-            <button
-              type="button"
-              onClick={openChat}
-              className={`flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-[15px] transition-all duration-200 ${
-                sidebarTab === "chat"
-                  ? "bg-white/55 font-semibold text-black shadow-sm dark:bg-white/10 dark:text-white"
-                  : "text-black/80 hover:bg-white/45 hover:text-black dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
-              }`}
-            >
-              <MessageCircleMore className="h-5 w-5" />
-              <span>AI chat</span>
-            </button>
           </div>
 
           <div className="mt-auto pt-10">
@@ -349,21 +484,175 @@ export default function DashboardClient({
             ) : null}
 
             {sidebarTab === "dashboard" && step === 2 ? (
-              <PathSelector
-                items={availablePaths.map((path) => {
-                  const localized = localizeCareerPath(path, language);
-                  return {
-                    id: path.id,
-                    title: localized.name,
-                    description: path.description,
-                    badge: selectedLevel ? localizeCareerLevel(selectedLevel, language).label : "Level",
-                    icon: localized.name.slice(0, 2).toUpperCase(),
-                  };
-                })}
-                selectedId={selection.pathId}
-                columns="2"
-                onSelect={handlePathSelect}
-              />
+              showAssessment && selection.levelId === "10th" ? (
+                <div className="space-y-6">
+                  <div className="rounded-[24px] border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                    <h2 className="text-3xl font-black text-[#111827] dark:text-white">
+                      Skills & Interest Assessment
+                    </h2>
+                    <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+                      Answer these 10 questions and get AI guidance for the best-fit 10th-standard options.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-4">
+                    {assessmentQuestions.map((question, index) => (
+                      <div
+                        key={question.id}
+                        className="rounded-[22px] border border-[#dfe5ef] bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
+                      >
+                        <p className="text-sm font-black uppercase tracking-[0.22em] text-slate-400">
+                          Question {index + 1}
+                        </p>
+                        <h3 className="mt-2 text-lg font-bold text-[#111827] dark:text-white">
+                          {question.question}
+                        </h3>
+                        <div className="mt-4 grid gap-3 md:grid-cols-2">
+                          {question.options.map((option) => {
+                            const selected = assessmentAnswers[question.id] === option;
+                            return (
+                              <button
+                                key={option}
+                                type="button"
+                                onClick={() =>
+                                  setAssessmentAnswers((current) => ({
+                                    ...current,
+                                    [question.id]: option,
+                                  }))
+                                }
+                                className={`rounded-[18px] border px-4 py-3 text-left text-sm font-medium transition ${
+                                  selected
+                                    ? "border-blue-400 bg-blue-50 text-blue-700 dark:border-sky-500 dark:bg-sky-950/40 dark:text-sky-300"
+                                    : "border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-300 hover:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+                                }`}
+                              >
+                                {option}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={submitAssessment}
+                      disabled={isAssessing}
+                      className="rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:opacity-60"
+                    >
+                      {isAssessing ? "Analyzing..." : "Analyze with AI"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAssessment(false);
+                        setAssessmentAnswers({});
+                        setAssessmentResult(null);
+                      }}
+                      className="rounded-full border border-slate-200 px-6 py-3 text-sm font-bold text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-700 dark:text-slate-200"
+                    >
+                      Back to 10th options
+                    </button>
+                  </div>
+
+                  {assessmentResult ? (
+                    <div className="rounded-[24px] border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                      <h3 className="text-2xl font-black text-[#111827] dark:text-white">
+                        AI Assessment Result
+                      </h3>
+                      <div className="mt-4 rounded-[20px] border border-blue-200 bg-blue-50 p-5 dark:border-sky-800 dark:bg-sky-950/30">
+                        <p className="text-xs font-black uppercase tracking-[0.24em] text-blue-600 dark:text-sky-300">
+                          Best Field To Choose
+                        </p>
+                        <p className="mt-2 text-xl font-black text-[#111827] dark:text-white">
+                          {assessmentResult.primaryRecommendation.title}
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                          {assessmentResult.primaryRecommendation.reason}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowAssessment(false);
+                            handlePathSelect(assessmentResult.primaryRecommendation.pathId);
+                          }}
+                          className="mt-4 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700"
+                        >
+                          Choose this field
+                        </button>
+                      </div>
+                      <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                        {assessmentResult.summary}
+                      </p>
+                      <div className="mt-5 flex flex-wrap gap-3">
+                        {assessmentResult.strengths.map((strength) => (
+                          <span
+                            key={strength}
+                            className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                          >
+                            {strength}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-6 grid gap-4 md:grid-cols-2">
+                        {assessmentResult.recommendedPaths.map((item) => (
+                          <button
+                            key={`${item.pathId}-${item.title}`}
+                            type="button"
+                            onClick={() => {
+                              setShowAssessment(false);
+                              handlePathSelect(item.pathId);
+                            }}
+                            className="rounded-[20px] border border-[#dfe5ef] bg-slate-50 p-5 text-left transition hover:border-blue-300 hover:bg-white dark:border-slate-700 dark:bg-slate-950"
+                          >
+                            <p className="text-lg font-black text-[#111827] dark:text-white">{item.title}</p>
+                            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                              {item.reason}
+                            </p>
+                          </button>
+                        ))}
+                      </div>
+                      <p className="mt-5 text-sm font-medium text-slate-600 dark:text-slate-300">
+                        {assessmentResult.nextStep}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <PathSelector
+                  items={[
+                    ...(selection.levelId === "10th"
+                      ? [
+                          {
+                            id: "skills-assessment-10th",
+                            title: "Skills & Interest Assessment",
+                            description:
+                              "Answer 10 questions and get AI guidance for the best-fit 10th-standard options.",
+                            badge: "Assessment",
+                            icon: "AI",
+                          },
+                        ]
+                      : []),
+                    ...availablePaths.map((path) => {
+                      const localized = localizeCareerPath(path, language);
+                      return {
+                        id: path.id,
+                        title: localized.name,
+                        description: path.description,
+                        badge: selectedLevel
+                          ? localizeCareerLevel(selectedLevel, language).label
+                          : "Level",
+                        icon: localized.name.slice(0, 2).toUpperCase(),
+                      };
+                    }),
+                  ]}
+                  selectedId={selection.pathId}
+                  columns="2"
+                  onSelect={handlePathSelect}
+                />
+              )
             ) : null}
 
             {sidebarTab === "dashboard" && step === 3 && selectedPath ? (
@@ -476,7 +765,7 @@ export default function DashboardClient({
       <button
         type="button"
         onClick={openChat}
-        className="fixed bottom-5 left-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#111827] text-white shadow-lg transition hover:scale-105 hover:opacity-95 dark:bg-slate-800"
+        className="fixed right-5 top-1/2 z-40 flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-[#111827] text-white shadow-lg transition hover:scale-105 hover:opacity-95 dark:bg-slate-800 animate-pulse"
         aria-label="Open AI chat"
       >
         <Bot className="h-6 w-6" />

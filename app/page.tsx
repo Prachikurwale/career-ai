@@ -99,11 +99,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <div className="pointer-events-none fixed right-5 top-1/2 z-40 -translate-y-1/2">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_16px_36px_rgba(37,99,235,0.38)] animate-pulse">
-          <Bot className="h-8 w-8" />
-        </div>
-      </div>
+    
     </main>
   );
 }

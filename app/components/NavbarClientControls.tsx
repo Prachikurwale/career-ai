@@ -51,7 +51,7 @@ export default function NavbarClientControls({
 
       {showLanguage ? (
         <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 dark:border-slate-700 dark:bg-slate-900">
-          <Globe className="h-4 w-4 text-slate-500 dark:text-slate-300" />
+          <Globe className="h-4 w-4 text-pink-500 dark:text-slate-300" />
           <LanguageDropdown value={language} onChange={updateLanguage} className="border-0 px-1 py-1" />
         </div>
       ) : null}
@@ -63,7 +63,7 @@ export default function NavbarClientControls({
           href="/login"
           className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700"
         >
-          <LogIn size={16} />
+           
           <span>Login</span>
         </Link>
       ) : null}

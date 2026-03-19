@@ -4,6 +4,7 @@ import { auth } from "../auth";
 import {
   getLevelById,
   getPathById,
+  getPathsByLevel,
   getSpecializationById,
 } from "../app/data/careers";
 import connectDB from "../lib/db";
@@ -444,4 +445,84 @@ Rules:
   ]);
 
   return content ?? getTranslation(language).chatError;
+}
+
+export async function analyzeSkillAssessment(
+  answers: string[],
+  language: LanguageCode = "english",
+) {
+  const session = await auth();
+  const rateLimitKey = session?.user?.email ?? "anonymous-assessment";
+  const rateLimit = enforceRateLimit(rateLimitKey, 5, 60_000);
+
+  if (!rateLimit.ok) {
+    throw new Error("Too many assessment requests. Please wait a moment and try again.");
+  }
+
+  const languageLabel = {
+    english: "English",
+    hindi: "Hindi in Devanagari script",
+    marathi: "Marathi in Devanagari script",
+  }[language];
+
+  const tenLevelPaths = getPathsByLevel("10th").map((path) => ({
+    id: path.id,
+    name: path.name,
+    description: path.description,
+  }));
+
+  const prompt = `
+You are Bharat Career Guru.
+
+Analyze this 10th-standard student skills and interests assessment.
+Write all user-facing text in ${languageLabel}.
+
+Available 10th-level path options:
+${JSON.stringify(tenLevelPaths)}
+
+Student answers:
+${answers.map((answer, index) => `${index + 1}. ${answer}`).join("\n")}
+
+Return strict JSON only in this shape:
+{
+  "primaryRecommendation": {
+    "pathId": "",
+    "title": "",
+    "reason": ""
+  },
+  "summary": "",
+  "strengths": ["", "", ""],
+  "recommendedPaths": [
+    { "pathId": "", "title": "", "reason": "" }
+  ],
+  "nextStep": ""
+}
+
+Important:
+- You must recommend the single best field to choose in "primaryRecommendation".
+- "primaryRecommendation" must be one of the available 10th-level path options.
+- Be decisive, not vague.
+- "recommendedPaths" can include 2 or 3 supporting alternatives, but the first priority is the one best-fit field.
+`;
+
+  const content = await postToNvidia([
+    {
+      role: "system",
+      content:
+        "You are an expert Indian student aptitude counselor. Return strict JSON only with no markdown fences.",
+    },
+    { role: "user", content: prompt },
+  ]);
+
+  if (!content) {
+    throw new Error("No assessment analysis returned by AI.");
+  }
+
+  return parseAiJson<{
+    primaryRecommendation: { pathId: string; title: string; reason: string };
+    summary: string;
+    strengths: string[];
+    recommendedPaths: Array<{ pathId: string; title: string; reason: string }>;
+    nextStep: string;
+  }>(content);
 }
