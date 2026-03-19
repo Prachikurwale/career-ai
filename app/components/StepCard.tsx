@@ -21,10 +21,10 @@ export default function StepCard({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full rounded-[22px] border p-5 text-left transition ${
+      className={`w-full rounded-[22px] border p-5 text-left transition-all duration-200 ${
         selected
-          ? "border-[#c8d4ea] bg-[#f8fbff] shadow-sm dark:border-sky-400 dark:bg-slate-900"
-          : "border-[#dfe5ef] bg-white hover:-translate-y-0.5 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          ? "border-[#bfcceb] bg-[#eef4ff] shadow-md ring-2 ring-[#d5e2ff] dark:border-sky-400 dark:bg-slate-900"
+          : "border-[#dfe5ef] bg-white hover:-translate-y-0.5 hover:border-[#c2d2f2] hover:bg-[#fbfdff] hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-sky-700"
       }`}
     >
       <div className="flex items-start justify-between gap-4">

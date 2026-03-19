@@ -1,11 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
+  Bot,
   Grid2x2,
+  House,
   LogOut,
   MessageCircleMore,
   ReceiptText,
@@ -226,9 +229,9 @@ export default function DashboardClient({
   };
 
   return (
-    <div className="-mt-4 min-h-[calc(100vh-4.75rem)] overflow-hidden bg-[#efd9f7] dark:bg-[#150d1b]">
-      <div className="grid min-h-[calc(100vh-4.75rem)] md:grid-cols-[126px_minmax(0,1fr)]">
-        <aside className="flex flex-col border-r border-black/10 bg-[#d9d9d9] px-3 py-4 dark:border-white/10 dark:bg-slate-900">
+    <div className="h-[calc(100vh-4.75rem)] overflow-hidden bg-[#efd9f7] dark:bg-[#150d1b]">
+      <div className="grid h-full md:grid-cols-[182px_minmax(0,1fr)]">
+        <aside className="flex h-full flex-col overflow-y-auto border-r border-black/10 bg-[#d9d9d9] px-4 py-4 dark:border-white/10 dark:bg-slate-900">
           <div className="flex flex-col items-center">
             {userImage ? (
               <Image
@@ -246,15 +249,25 @@ export default function DashboardClient({
             <p className="mt-2 text-center text-[17px] font-bold text-black dark:text-white">
               {displayName}
             </p>
-            <div className="mt-3 w-full border-t border-dashed border-black dark:border-white" />
+            <div className="mt-3 w-full border-t border-black/60 dark:border-white/60" />
           </div>
 
           <div className="mt-8 space-y-3">
+            <Link
+              href="/"
+              className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-[15px] text-black/80 transition-all duration-200 hover:bg-white/45 hover:text-black dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
+            >
+              <House className="h-5 w-5" />
+              <span>Home</span>
+            </Link>
+
             <button
               type="button"
               onClick={resetToDashboard}
-              className={`flex w-full items-center gap-2 text-left text-[15px] ${
-                sidebarTab === "dashboard" ? "font-semibold text-black dark:text-white" : "text-black/80 dark:text-white/80"
+              className={`flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-[15px] transition-all duration-200 ${
+                sidebarTab === "dashboard"
+                  ? "bg-white/55 font-semibold text-black shadow-sm dark:bg-white/10 dark:text-white"
+                  : "text-black/80 hover:bg-white/45 hover:text-black dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
               }`}
             >
               <Grid2x2 className="h-5 w-5" />
@@ -264,24 +277,32 @@ export default function DashboardClient({
             <button
               type="button"
               onClick={openSavedReports}
-              className={`flex w-full items-center gap-2 text-left text-[15px] ${
-                sidebarTab === "saved" ? "font-semibold text-[#ff3a33]" : "text-black/80 dark:text-white/80"
+              className={`flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-[15px] transition-all duration-200 ${
+                sidebarTab === "saved"
+                  ? "bg-white/55 font-semibold text-[#ff3a33] shadow-sm dark:bg-white/10"
+                  : "text-black/80 hover:bg-white/45 hover:text-black dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
               }`}
             >
               <ReceiptText className="h-5 w-5" />
               <span className={sidebarTab === "saved" ? "text-[#ff3a33]" : ""}>save report</span>
             </button>
-          </div>
 
-          <div className="mt-auto pt-10">
             <button
               type="button"
               onClick={openChat}
-              className="mb-4 flex items-center gap-2 text-[18px] text-black transition hover:opacity-80 dark:text-white"
+              className={`flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left text-[15px] transition-all duration-200 ${
+                sidebarTab === "chat"
+                  ? "bg-white/55 font-semibold text-black shadow-sm dark:bg-white/10 dark:text-white"
+                  : "text-black/80 hover:bg-white/45 hover:text-black dark:text-white/80 dark:hover:bg-white/10 dark:hover:text-white"
+              }`}
             >
-              <MessageCircleMore className="h-6 w-6" />
+              <MessageCircleMore className="h-5 w-5" />
               <span>AI chat</span>
             </button>
+          </div>
+
+          <div className="mt-auto pt-10">
+            <div className="mb-4 w-full border-t border-white/70 dark:border-white/15" />
 
             <form action={signOutToHome}>
               <button className="flex items-center gap-2 text-[18px] text-[#ff3a33] transition hover:opacity-80">
@@ -292,7 +313,7 @@ export default function DashboardClient({
           </div>
         </aside>
 
-        <section className="px-5 py-5 md:px-8">
+        <section className="h-full overflow-y-auto px-5 py-5 md:px-7">
           {showBack ? (
             <button
               type="button"
@@ -304,7 +325,7 @@ export default function DashboardClient({
             </button>
           ) : null}
 
-          <div className="mx-auto max-w-5xl rounded-none border border-[#e9edf5] bg-[#fafbfd] p-6 shadow-[0_1px_0_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-slate-950 md:p-8">
+          <div className="min-h-full w-full rounded-none border border-[#ead8f4] bg-[#f7e8fb] p-6 shadow-[0_1px_0_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-[#221328] md:p-8">
             {sidebarTab === "dashboard" && step === 1 ? (
               <div className="space-y-6">
                 <h1 className="text-4xl font-black text-[#111827] dark:text-white">
@@ -451,6 +472,15 @@ export default function DashboardClient({
           </div>
         </section>
       </div>
+
+      <button
+        type="button"
+        onClick={openChat}
+        className="fixed bottom-5 left-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#111827] text-white shadow-lg transition hover:scale-105 hover:opacity-95 dark:bg-slate-800"
+        aria-label="Open AI chat"
+      >
+        <Bot className="h-6 w-6" />
+      </button>
     </div>
   );
 }

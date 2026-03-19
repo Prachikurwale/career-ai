@@ -32,8 +32,8 @@ export default async function Page({ searchParams }: DashboardPageProps) {
     "english";
 
   return (
-    <main className="min-h-screen bg-slate-50 p-4 dark:bg-slate-950 md:p-8">
-      <div className="mx-auto max-w-7xl">
+    <main className="h-[calc(100vh-4.75rem)] overflow-hidden bg-transparent p-0">
+      <div className="h-full max-w-none">
         <DashboardClient
           initialReports={initialReports}
           initialLanguage={initialLanguage}
