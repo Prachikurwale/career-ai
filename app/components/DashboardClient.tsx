@@ -1,10 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Bot, Compass, FileStack, History, Plus } from "lucide-react";
+import {
+  ArrowLeft,
+  Grid2x2,
+  LogOut,
+  MessageCircleMore,
+  ReceiptText,
+} from "lucide-react";
+import CareerChatbot from "./CareerChatbot";
 import LoadingScreen from "./LoadingScreen";
-import FloatingCareerAssistant from "./FloatingCareerAssistant";
 import PathSelector from "./PathSelector";
 import ReportViewer from "./ReportViewer";
 import {
@@ -22,11 +29,13 @@ import {
   parseLanguageCode,
 } from "../../lib/i18n";
 import { generateCareerReport, saveCareerReport } from "../../actions/career-ai";
+import { signOutToHome } from "@/actions/auth";
 import type { CareerReport, LanguageCode, SavedCareerReport } from "../../types/career";
 
 type DashboardClientProps = {
   initialReports: SavedCareerReport[];
   userName?: string | null;
+  userImage?: string | null;
   initialLanguage: LanguageCode;
 };
 
@@ -39,6 +48,7 @@ type SelectionState = {
 export default function DashboardClient({
   initialReports,
   userName,
+  userImage,
   initialLanguage,
 }: DashboardClientProps) {
   const router = useRouter();
@@ -53,16 +63,16 @@ export default function DashboardClient({
   });
   const [reports, setReports] = useState<SavedCareerReport[]>(initialReports);
   const [generatedReport, setGeneratedReport] = useState<CareerReport | null>(null);
-  const [activeSavedId, setActiveSavedId] = useState<string | null>(
-    initialReports[0]?._id ?? null,
-  );
+  const [activeSavedId, setActiveSavedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, startGenerate] = useTransition();
   const [isSaving, startSave] = useTransition();
+  const [sidebarTab, setSidebarTab] = useState<"dashboard" | "saved" | "chat">("dashboard");
   const searchParamsString = searchParams.toString();
   const language = parseLanguageCode(searchParams.get("lang")) ?? preferredLanguage;
 
   const t = getTranslation(language);
+  const displayName = userName?.trim() || "User";
   const selectedLevel = getLevelById(selection.levelId);
   const selectedPath = getPathById(selection.pathId);
   const selectedSpecialization = getSpecializationById(
@@ -77,6 +87,9 @@ export default function DashboardClient({
 
   const activeSavedReport = reports.find((report) => report._id === activeSavedId) ?? null;
   const visibleReport = generatedReport ?? activeSavedReport?.report ?? null;
+  const showSavedList = sidebarTab === "saved" && !activeSavedId && !generatedReport;
+  const showReport = step === 4 && Boolean(visibleReport);
+  const showBack = step > 1 || sidebarTab === "saved" || sidebarTab === "chat" || activeSavedId !== null;
 
   const applyLanguage = (nextLanguage: LanguageCode) => {
     setPreferredLanguage(nextLanguage);
@@ -86,17 +99,35 @@ export default function DashboardClient({
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
-  const beginNewPath = () => {
+  const resetToDashboard = () => {
+    setSidebarTab("dashboard");
     setGeneratedReport(null);
-    setError(null);
     setActiveSavedId(null);
+    setError(null);
     setSelection({ levelId: "", pathId: "", specializationId: "" });
     setStep(1);
   };
 
+  const openSavedReports = () => {
+    setSidebarTab("saved");
+    setGeneratedReport(null);
+    setActiveSavedId(null);
+    setError(null);
+    setStep(4);
+  };
+
+  const openChat = () => {
+    setSidebarTab("chat");
+    setGeneratedReport(null);
+    setActiveSavedId(null);
+    setError(null);
+  };
+
   const handleLevelSelect = (levelId: string) => {
+    setSidebarTab("dashboard");
     setSelection({ levelId, pathId: "", specializationId: "" });
     setGeneratedReport(null);
+    setActiveSavedId(null);
     setError(null);
     setStep(2);
   };
@@ -104,6 +135,7 @@ export default function DashboardClient({
   const handlePathSelect = (pathId: string) => {
     setSelection((current) => ({ ...current, pathId, specializationId: "" }));
     setGeneratedReport(null);
+    setActiveSavedId(null);
     setError(null);
     setStep(3);
   };
@@ -113,6 +145,7 @@ export default function DashboardClient({
 
     setSelection(nextSelection);
     setGeneratedReport(null);
+    setActiveSavedId(null);
     setError(null);
     setStep(4);
 
@@ -135,11 +168,21 @@ export default function DashboardClient({
       try {
         const saved = await saveCareerReport({ ...selection, language }, generatedReport);
         setReports((current) => [saved, ...current]);
+        setGeneratedReport(null);
         setActiveSavedId(saved._id);
+        setSidebarTab("saved");
       } catch (caughtError) {
         setError(caughtError instanceof Error ? caughtError.message : t.saveError);
       }
     });
+  };
+
+  const openSavedReport = (report: SavedCareerReport) => {
+    setSidebarTab("saved");
+    setGeneratedReport(null);
+    setActiveSavedId(report._id);
+    applyLanguage(report.language ?? "english");
+    setStep(4);
   };
 
   const handleExport = () => {
@@ -148,132 +191,125 @@ export default function DashboardClient({
     }
   };
 
-  const goBack = () => {
-    if (step === 4) setStep(3);
-    if (step === 3) setStep(2);
-    if (step === 2) setStep(1);
+  const handleBack = () => {
+    if (activeSavedId) {
+      setActiveSavedId(null);
+      setGeneratedReport(null);
+      setSidebarTab("saved");
+      return;
+    }
+
+    if (sidebarTab === "saved") {
+      resetToDashboard();
+      return;
+    }
+
+    if (sidebarTab === "chat") {
+      resetToDashboard();
+      return;
+    }
+
+    if (step === 4) {
+      setGeneratedReport(null);
+      setStep(3);
+      return;
+    }
+
+    if (step === 3) {
+      setStep(2);
+      return;
+    }
+
+    if (step === 2) {
+      setStep(1);
+    }
   };
 
   return (
-    <>
-      <div className="grid gap-6 xl:grid-cols-[290px_minmax(0,1fr)]">
-        <aside className="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 xl:sticky xl:top-24 xl:h-fit">
-          <div className="rounded-[28px] bg-slate-950 p-5 text-white dark:bg-slate-800">
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-sky-300">
-              {t.dashboard}
+    <div className="-mt-4 min-h-[calc(100vh-4.75rem)] overflow-hidden bg-[#efd9f7] dark:bg-[#150d1b]">
+      <div className="grid min-h-[calc(100vh-4.75rem)] md:grid-cols-[126px_minmax(0,1fr)]">
+        <aside className="flex flex-col border-r border-black/10 bg-[#d9d9d9] px-3 py-4 dark:border-white/10 dark:bg-slate-900">
+          <div className="flex flex-col items-center">
+            {userImage ? (
+              <Image
+                src={userImage}
+                alt={displayName}
+                width={72}
+                height={72}
+                className="h-[72px] w-[72px] rounded-full border-2 border-black object-cover dark:border-white"
+              />
+            ) : (
+              <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-2 border-black bg-white text-2xl font-black text-black dark:border-white dark:bg-slate-800 dark:text-white">
+                {displayName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <p className="mt-2 text-center text-[17px] font-bold text-black dark:text-white">
+              {displayName}
             </p>
-            <h1 className="mt-3 text-2xl font-black">
-              {userName ? `${userName.split(" ")[0]} ` : ""}
-              {t.workspace}
-            </h1>
-            <p className="mt-3 text-sm leading-6 text-slate-300">{t.workspaceDescription}</p>
+            <div className="mt-3 w-full border-t border-dashed border-black dark:border-white" />
+          </div>
+
+          <div className="mt-8 space-y-3">
             <button
               type="button"
-              onClick={beginNewPath}
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-3 text-sm font-bold text-slate-900 transition hover:bg-slate-100"
+              onClick={resetToDashboard}
+              className={`flex w-full items-center gap-2 text-left text-[15px] ${
+                sidebarTab === "dashboard" ? "font-semibold text-black dark:text-white" : "text-black/80 dark:text-white/80"
+              }`}
             >
-              <Plus size={16} />
-              <span>{t.generateNewPath}</span>
+              <Grid2x2 className="h-5 w-5" />
+              <span>Dashboard</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={openSavedReports}
+              className={`flex w-full items-center gap-2 text-left text-[15px] ${
+                sidebarTab === "saved" ? "font-semibold text-[#ff3a33]" : "text-black/80 dark:text-white/80"
+              }`}
+            >
+              <ReceiptText className="h-5 w-5" />
+              <span className={sidebarTab === "saved" ? "text-[#ff3a33]" : ""}>save report</span>
             </button>
           </div>
 
-          <div className="mt-6 rounded-[28px] border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
-            <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
-              <History size={16} />
-              <h2 className="text-xs font-black uppercase tracking-[0.25em] text-slate-500">
-                {t.savedReports}
-              </h2>
-            </div>
-            <div className="mt-4 space-y-3">
-              {reports.length ? (
-                reports.map((report) => (
-                  <button
-                    key={report._id}
-                    type="button"
-                    onClick={() => {
-                      setGeneratedReport(null);
-                      setActiveSavedId(report._id);
-                      applyLanguage(report.language ?? "english");
-                      setStep(4);
-                    }}
-                    className={`w-full rounded-[22px] border px-4 py-3 text-left transition ${
-                      activeSavedId === report._id && !generatedReport
-                        ? "border-blue-400 bg-white shadow-sm dark:bg-slate-900"
-                        : "border-transparent bg-white/80 hover:border-slate-200 dark:bg-slate-900/80 dark:hover:border-slate-700"
-                    }`}
-                  >
-                    <p className="text-sm font-black text-slate-900 dark:text-slate-100">
-                      {report.specializationName}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                      {report.levelLabel} - {report.pathName}
-                    </p>
-                  </button>
-                ))
-              ) : (
-                <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  {t.noSavedReports}
-                </p>
-              )}
-            </div>
-          </div>
+          <div className="mt-auto pt-10">
+            <button
+              type="button"
+              onClick={openChat}
+              className="mb-4 flex items-center gap-2 text-[18px] text-black transition hover:opacity-80 dark:text-white"
+            >
+              <MessageCircleMore className="h-6 w-6" />
+              <span>AI chat</span>
+            </button>
 
-          <div className="mt-6 grid gap-3">
-            <div className="rounded-3xl border border-slate-200 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-950">
-              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                <Compass size={16} />
-                <span className="text-sm font-bold">{t.guidedPathfinder}</span>
-              </div>
-              <p className="mt-2 text-xs leading-6 text-slate-500 dark:text-slate-400">
-                {t.guidedPathfinderDescription}
-              </p>
-            </div>
-            <div className="rounded-3xl border border-slate-200 bg-white px-4 py-4 dark:border-slate-800 dark:bg-slate-950">
-              <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                <Bot size={16} />
-                <span className="text-sm font-bold">{t.askFollowup}</span>
-              </div>
-              <p className="mt-2 text-xs leading-6 text-slate-500 dark:text-slate-400">
-                {t.askFollowupDescription}
-              </p>
-            </div>
+            <form action={signOutToHome}>
+              <button className="flex items-center gap-2 text-[18px] text-[#ff3a33] transition hover:opacity-80">
+                <LogOut className="h-6 w-6 text-black dark:text-white" />
+                <span>Logout</span>
+              </button>
+            </form>
           </div>
         </aside>
 
-        <section className="space-y-6">
-          <div className="rounded-4xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 md:p-8">
-            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-xs font-black uppercase tracking-[0.3em] text-blue-600">
-                  {t.brand}
-                </p>
-                <h2 className="mt-2 text-3xl font-black text-slate-900 dark:text-slate-100">
-                  {t.navigatorTitle}
-                </h2>
-                <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-300">
-                  {t.navigatorDescription}
-                </p>
-              </div>
-              {step > 1 && step < 4 ? (
-                <button
-                  type="button"
-                  onClick={goBack}
-                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-3 text-sm font-bold text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-700 dark:text-slate-200 dark:hover:border-sky-400 dark:hover:text-sky-300"
-                >
-                  <ArrowLeft size={16} />
-                  <span>{t.back}</span>
-                </button>
-              ) : null}
-            </div>
+        <section className="px-5 py-5 md:px-8">
+          {showBack ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="mb-3 inline-flex items-center text-black transition hover:opacity-80 dark:text-white"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="h-12 w-12" strokeWidth={2.2} />
+            </button>
+          ) : null}
 
-            {error ? (
-              <div className="mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                {error}
-              </div>
-            ) : null}
-
-            <div className="mt-8">
-              {step === 1 ? (
+          <div className="mx-auto max-w-5xl rounded-none border border-[#e9edf5] bg-[#fafbfd] p-6 shadow-[0_1px_0_rgba(15,23,42,0.06)] dark:border-slate-800 dark:bg-slate-950 md:p-8">
+            {sidebarTab === "dashboard" && step === 1 ? (
+              <div className="space-y-6">
+                <h1 className="text-4xl font-black text-[#111827] dark:text-white">
+                  Welcome back, {displayName}
+                </h1>
                 <PathSelector
                   items={careerLevels.map((level) => {
                     const localized = localizeCareerLevel(level, language);
@@ -281,107 +317,140 @@ export default function DashboardClient({
                       id: level.id,
                       title: localized.label,
                       description: localized.description,
-                      badge: t.step1,
+                      badge: "Level",
                       icon: localized.shortLabel.slice(0, 2).toUpperCase(),
                     };
                   })}
                   selectedId={selection.levelId}
                   onSelect={handleLevelSelect}
                 />
-              ) : null}
+              </div>
+            ) : null}
 
-              {step === 2 ? (
-                <PathSelector
-                  items={availablePaths.map((path) => {
-                    const localized = localizeCareerPath(path, language);
-                    return {
-                      id: path.id,
-                      title: localized.name,
-                      description: path.description,
-                      badge: selectedLevel
-                        ? localizeCareerLevel(selectedLevel, language).shortLabel
-                        : undefined,
-                      icon: localized.name.slice(0, 2).toUpperCase(),
-                    };
-                  })}
-                  selectedId={selection.pathId}
-                  columns="2"
-                  onSelect={handlePathSelect}
-                />
-              ) : null}
+            {sidebarTab === "dashboard" && step === 2 ? (
+              <PathSelector
+                items={availablePaths.map((path) => {
+                  const localized = localizeCareerPath(path, language);
+                  return {
+                    id: path.id,
+                    title: localized.name,
+                    description: path.description,
+                    badge: selectedLevel ? localizeCareerLevel(selectedLevel, language).label : "Level",
+                    icon: localized.name.slice(0, 2).toUpperCase(),
+                  };
+                })}
+                selectedId={selection.pathId}
+                columns="2"
+                onSelect={handlePathSelect}
+              />
+            ) : null}
 
-              {step === 3 && selectedPath ? (
-                <PathSelector
-                  items={selectedPath.specializations.map((specialization) => {
-                    const localized = localizeCareerSpecialization(specialization, language);
-                    return {
-                      id: specialization.id,
-                      title: localized.name,
-                      description: `${localized.focus}. ${t.duration}: ${specialization.duration}.`,
-                      badge: localizeCareerPath(selectedPath, language).name,
-                      icon: localized.name.slice(0, 2).toUpperCase(),
-                    };
-                  })}
-                  selectedId={selection.specializationId}
-                  columns="2"
-                  onSelect={handleSpecializationSelect}
-                />
-              ) : null}
+            {sidebarTab === "dashboard" && step === 3 && selectedPath ? (
+              <PathSelector
+                items={selectedPath.specializations.map((specialization) => {
+                  const localized = localizeCareerSpecialization(specialization, language);
+                  return {
+                    id: specialization.id,
+                    title: localized.name,
+                    description: `${localized.focus}. Duration: ${specialization.duration}.`,
+                    badge: localizeCareerPath(selectedPath, language).name,
+                    icon: localized.name.slice(0, 2).toUpperCase(),
+                  };
+                })}
+                selectedId={selection.specializationId}
+                columns="2"
+                onSelect={handleSpecializationSelect}
+              />
+            ) : null}
 
-              {step === 4 ? (
-                <div className="space-y-6">
-                  <div className="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-300">
-                    <span className="font-bold text-slate-900 dark:text-slate-100">
-                      {t.selection}
-                    </span>{" "}
-                    {selectedLevel
-                      ? localizeCareerLevel(selectedLevel, language).label
-                      : activeSavedReport?.levelLabel ?? t.savedPath}
-                    {" -> "}
-                    {selectedPath
-                      ? localizeCareerPath(selectedPath, language).name
-                      : activeSavedReport?.pathName ?? t.path}
-                    {" -> "}
-                    {selectedSpecialization
-                      ? localizeCareerSpecialization(selectedSpecialization, language).name
-                      : activeSavedReport?.specializationName ?? t.specialization}
-                  </div>
-
-                  {isGenerating ? (
-                    <LoadingScreen language={language} />
-                  ) : visibleReport ? (
-                    <ReportViewer
-                      language={language}
-                      report={visibleReport}
-                      onSave={generatedReport ? handleSaveReport : undefined}
-                      onExport={handleExport}
-                      saveDisabled={isSaving}
-                      saveLabel={isSaving ? t.saving : t.saveReport}
-                      titleSuffix={generatedReport ? t.freshRoadmap : t.savedRoadmap}
-                    />
-                  ) : (
-                    <div className="rounded-[28px] border border-dashed border-slate-300 bg-slate-50 p-10 text-center dark:border-slate-700 dark:bg-slate-950">
-                      <div className="mx-auto max-w-xl">
-                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white dark:bg-slate-800">
-                          <FileStack />
-                        </div>
-                        <h3 className="mt-5 text-2xl font-black text-slate-900 dark:text-slate-100">
-                          {t.emptyReportTitle}
-                        </h3>
-                        <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
-                          {t.emptyReportDescription}
-                        </p>
-                      </div>
-                    </div>
-                  )}
+            {showSavedList ? (
+              <div className="space-y-6">
+                <div className="rounded-[24px] border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                  <h2 className="text-4xl font-black text-[#111827] dark:text-white">Saved Reports</h2>
+                  <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+                    {reports.length} reports saved
+                  </p>
                 </div>
-              ) : null}
-            </div>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  {reports.map((report) => (
+                    <button
+                      key={report._id}
+                      type="button"
+                      onClick={() => openSavedReport(report)}
+                      className="rounded-[22px] border border-[#dfe5ef] bg-white p-5 text-left transition hover:-translate-y-0.5 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                    >
+                      <p className="text-2xl font-black text-[#111827] dark:text-white">
+                        {report.specializationName}
+                      </p>
+                      <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
+                        {report.levelLabel}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+                        {report.pathName}
+                      </p>
+                      <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
+                        {new Date(report.createdAt).toLocaleDateString("en-GB")}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {isGenerating ? <LoadingScreen language={language} /> : null}
+
+            {showReport && !isGenerating ? (
+              <div className="space-y-5">
+                {generatedReport ? (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={handleSaveReport}
+                      disabled={isSaving}
+                      className="rounded-full bg-[#111827] px-5 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
+                    >
+                      {isSaving ? t.saving : t.saveReport}
+                    </button>
+                  </div>
+                ) : null}
+                <ReportViewer
+                  language={language}
+                  report={visibleReport as CareerReport}
+                  onExport={handleExport}
+                  titleSuffix={generatedReport ? t.freshRoadmap : t.savedRoadmap}
+                />
+              </div>
+            ) : null}
+
+            {error ? (
+              <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {error}
+              </div>
+            ) : null}
+
+            {sidebarTab === "saved" && !reports.length ? (
+              <div className="rounded-[24px] border border-dashed border-[#dfe5ef] bg-white p-10 text-center dark:border-slate-800 dark:bg-slate-900">
+                <p className="text-lg font-semibold text-slate-700 dark:text-slate-200">
+                  No saved reports yet
+                </p>
+              </div>
+            ) : null}
+
+            {sidebarTab === "chat" ? (
+              <div className="space-y-6">
+                <div className="rounded-[24px] border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                  <h2 className="text-4xl font-black text-[#111827] dark:text-white">AI Chat</h2>
+                  <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+                    Ask about careers, colleges, streams, exams, fees, and next steps.
+                  </p>
+                </div>
+                <CareerChatbot language={language} />
+              </div>
+            ) : null}
           </div>
         </section>
       </div>
-
-      <FloatingCareerAssistant key={language} language={language} />
-    </>
+    </div>
   );
 }

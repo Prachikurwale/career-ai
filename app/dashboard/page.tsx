@@ -38,6 +38,7 @@ export default async function Page({ searchParams }: DashboardPageProps) {
           initialReports={initialReports}
           initialLanguage={initialLanguage}
           userName={session.user.name}
+          userImage={session.user.image}
         />
       </div>
     </main>

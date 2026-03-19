@@ -7,10 +7,12 @@ import {
   getSpecializationById,
 } from "../app/data/careers";
 import connectDB from "../lib/db";
+import { CAREER_CHART_SOURCE } from "../lib/career-chart-source";
 import { getTranslation } from "../lib/i18n";
 import { enforceRateLimit } from "../lib/rate-limit";
 import CareerHistory from "../models/CareerHistory";
 import type { LanguageCode } from "../types/career";
+import type { CareerChartOutline } from "../types/career-chart";
 
 export type CareerReport = {
   title: string;
@@ -134,6 +136,18 @@ function parseCareerReport(rawContent: string): CareerReport {
   }
 }
 
+function parseAiJson<T>(rawContent: string): T {
+  const jsonString = extractJsonObject(rawContent)
+    .replace(/^\uFEFF/, "")
+    .trim();
+
+  try {
+    return JSON.parse(jsonString) as T;
+  } catch {
+    throw new Error("AI returned an invalid JSON format. Please try again.");
+  }
+}
+
 export async function getCareerGuidance(userMessage: string) {
   const content = await postToNvidia([
     {
@@ -145,6 +159,109 @@ export async function getCareerGuidance(userMessage: string) {
   ]);
 
   return content ?? "No response received from the AI assistant.";
+}
+
+export async function generateCareerChartOutline(
+  language: LanguageCode = "english",
+) {
+  const session = await auth();
+  const rateLimitKey = session?.user?.email ?? "anonymous-career-chart";
+  const rateLimit = enforceRateLimit(rateLimitKey, 4, 60_000);
+
+  if (!rateLimit.ok) {
+    throw new Error("Too many career chart requests. Please wait a minute and try again.");
+  }
+
+  const languageLabel = {
+    english: "English",
+    hindi: "Hindi in Devanagari script",
+    marathi: "Marathi in Devanagari script",
+  }[language];
+
+  const prompt = `
+You are Bharat Career Guru.
+
+Your task is to convert the following career chart transcription into a deep, structured hierarchical outline.
+
+Critical rules:
+- Use ONLY the source text below. Do not invent new branches.
+- Preserve durations exactly when they are present in the source.
+- Organize the response strictly into these 4 sections:
+  1. Level 1: 10th (S.S.C.) Options
+  2. Level 2: 12th (H.S.C.) Streams
+  3. Level 3: Undergraduate / Professional Courses
+  4. Level 4: Post-Graduate / Career Outcomes
+- Make the content deep and detailed.
+- The "bullets" arrays must contain nested bullet lines using leading spaces and "-".
+- For Level 2, clearly separate 12th Commerce, 12th Arts, and 12th Science, and inside Science separate PCMB, PCB, and PCM.
+- In Level 2, nest the actual stream branches under each stream heading so a user can click a stream and keep drilling down into degrees and next outcomes.
+- For Level 3 and Level 4, group branches under the right stream.
+- IMPORTANT: In Level 3, whenever a bachelor's degree, diploma, or licence has a known next step in the source, nest that next step directly under it so users can click deeper after selecting the course.
+- Level 4 should still summarize the post-graduate, exam, and career outcomes grouped by stream.
+- Add a glossary from the shortforms list as a clean two-column table source using JSON items.
+- Write ALL user-facing text in ${languageLabel}.
+- Return strict JSON only.
+
+Return exactly this schema:
+{
+  "pageTitle": "",
+  "pageSubtitle": "",
+  "note": "",
+  "sections": [
+    {
+      "id": "level-1",
+      "sidebarLabel": "",
+      "title": "",
+      "description": "",
+      "bullets": ["- ...", "  - ..."]
+    },
+    {
+      "id": "level-2",
+      "sidebarLabel": "",
+      "title": "",
+      "description": "",
+      "bullets": []
+    },
+    {
+      "id": "level-3",
+      "sidebarLabel": "",
+      "title": "",
+      "description": "",
+      "bullets": []
+    },
+    {
+      "id": "level-4",
+      "sidebarLabel": "",
+      "title": "",
+      "description": "",
+      "bullets": []
+    }
+  ],
+  "glossaryTitle": "",
+  "glossaryDescription": "",
+  "glossary": [
+    { "shortform": "", "meaning": "" }
+  ]
+}
+
+Source transcription:
+${CAREER_CHART_SOURCE}
+  `;
+
+  const content = await postToNvidia([
+    {
+      role: "system",
+      content:
+        "You are an expert Indian education and career mapping assistant. Return strict JSON only with no markdown fences.",
+    },
+    { role: "user", content: prompt },
+  ]);
+
+  if (!content) {
+    throw new Error("No career chart outline returned by AI.");
+  }
+
+  return parseAiJson<CareerChartOutline>(content);
 }
 
 export async function generateCareerReport(selection: SelectionInput) {
