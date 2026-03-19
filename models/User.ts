@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import { Schema, model, models } from "mongoose";
 
 const UserSchema = new Schema({
   name: String,
@@ -6,7 +6,7 @@ const UserSchema = new Schema({
   image: String,
   careerPath: String,
   preferences: Object,
-}, { timestamps: true });
+}, { timestamps: true, collection: "users" });
 
 const User = models.User || model("User", UserSchema);
 export default User;

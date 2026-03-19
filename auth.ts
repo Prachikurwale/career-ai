@@ -26,5 +26,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return true;
     },
+    async session({ session }) {
+      return session;
+    },
   },
 })

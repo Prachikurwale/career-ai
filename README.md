@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bharat Career Guru
 
-## Getting Started
+AI-powered career counseling platform for Indian students built with Next.js, Auth.js, MongoDB, and NVIDIA Llama.
 
-First, run the development server:
+## Folder Structure
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+app/
+  api/auth/[...nextauth]/route.ts
+  components/
+    CareerChatbot.tsx
+    DashboardClient.tsx
+    LoadingScreen.tsx
+    PathSelector.tsx
+    ReportViewer.tsx
+    StepCard.tsx
+  dashboard/page.tsx
+  data/careers.ts
+actions/
+  career-ai.ts
+lib/
+  db.ts
+  rate-limit.ts
+models/
+  CareerHistory.ts
+  User.ts
+types/
+  career.ts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Interactive drill-down flow from level to path to specialization
+- AI master report engine with structured JSON output
+- Google authentication with protected dashboard
+- MongoDB storage for users and saved career reports
+- Sidebar dashboard with saved report history
+- AI chatbot for follow-up career questions
+- Basic in-memory rate limiting for chat and report generation
+- Print-friendly PDF export via browser print flow
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Setup
 
-## Learn More
+Copy `.env.example` values into `.env.local`:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+AUTH_SECRET=
+MONGODB_URI=
+NVIDIA_API_KEY=
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Local Development
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+npm run dev
+```
 
-## Deploy on Vercel
+Open `http://localhost:3000`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Implementation Flow
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. User lands on the marketing page and signs in with Google.
+2. Protected `/dashboard` loads saved reports from MongoDB.
+3. Student selects level, path, and specialization in the drill-down UI.
+4. Final selection calls `generateCareerReport` in `actions/career-ai.ts`.
+5. NVIDIA Llama returns structured JSON for the AI report.
+6. Student can save the report to the `career_history` collection.
+7. Student can revisit saved reports or ask the chatbot follow-up questions.
+
+## Deployment Notes
+
+- Deploy on Vercel.
+- Add all environment variables in the Vercel project settings.
+- Set the Google OAuth callback URL to your Vercel domain plus `/api/auth/callback/google`.
+- MongoDB Atlas should whitelist your deployment IP policy appropriately.
+
+## Suggested Next Upgrades
+
+- Replace in-memory rate limiting with Upstash Redis or a database-backed limiter.
+- Add true PDF generation with `@react-pdf/renderer` or server-side PDF export.
+- Add report search and filtering in the sidebar.
+- Add analytics for most-selected streams and report generation success rate.
