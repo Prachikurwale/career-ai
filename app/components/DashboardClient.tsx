@@ -22,7 +22,6 @@ import {
   getLevelById,
   getPathById,
   getPathsByLevel,
-  getSpecializationById,
 } from "../data/careers";
 import {
   getTranslation,
@@ -138,6 +137,105 @@ const assessmentQuestions: AssessmentQuestion[] = [
   },
 ];
 
+const dashboardCopy: Record<
+  LanguageCode,
+  {
+    welcomeBack: (name: string) => string;
+    levelBadge: string;
+    assessmentTitle: string;
+    assessmentDescription: string;
+    questionLabel: (index: number) => string;
+    analyzing: string;
+    analyzeWithAi: string;
+    backTo10thOptions: string;
+    assessmentResultTitle: string;
+    bestFieldToChoose: string;
+    chooseThisField: string;
+    durationLabel: string;
+    reportsSaved: (count: number) => string;
+    deleteSavedReport: string;
+    openChat: string;
+    chatTooltip: string;
+    answerAllQuestions: string;
+    deleteReportError: string;
+    assessmentError: string;
+  }
+> = {
+  english: {
+    welcomeBack: (name) => `Welcome back, ${name}`,
+    levelBadge: "Level",
+    assessmentTitle: "Skills & Interest Assessment",
+    assessmentDescription:
+      "Answer these 10 questions and get AI guidance for the best-fit 10th-standard options.",
+    questionLabel: (index) => `Question ${index}`,
+    analyzing: "Analyzing...",
+    analyzeWithAi: "Analyze with AI",
+    backTo10thOptions: "Back to 10th options",
+    assessmentResultTitle: "AI Assessment Result",
+    bestFieldToChoose: "Best Field To Choose",
+    chooseThisField: "Choose this field",
+    durationLabel: "Duration",
+    reportsSaved: (count) => `${count} reports saved`,
+    deleteSavedReport: "Delete saved report",
+    openChat: "Open AI chat",
+    chatTooltip: "Get guidance based on your goals and education",
+    answerAllQuestions: "Please answer all assessment questions first.",
+    deleteReportError: "Could not delete the saved report right now.",
+    assessmentError: "Could not analyze the assessment right now.",
+  },
+  hindi: {
+    welcomeBack: (name) =>
+      `\u0935\u093e\u092a\u0938 \u0938\u094d\u0935\u093e\u0917\u0924 \u0939\u0948, ${name}`,
+    levelBadge: "\u0938\u094d\u0924\u0930",
+    assessmentTitle: "\u0938\u094d\u0915\u093f\u0932\u094d\u0938 \u0914\u0930 \u0930\u0941\u091a\u093f \u0905\u0938\u0947\u0938\u092e\u0947\u0902\u091f",
+    assessmentDescription:
+      "\u0907\u0928 \u0031\u0030 \u0938\u0935\u093e\u0932\u094b\u0902 \u0915\u0947 \u091c\u0935\u093e\u092c \u0926\u0947\u0902 \u0914\u0930 \u0031\u0030\u0935\u0940\u0902 \u0915\u0947 \u0938\u092c\u0938\u0947 \u0909\u092a\u092f\u0941\u0915\u094d\u0924 \u0935\u093f\u0915\u0932\u094d\u092a\u094b\u0902 \u092a\u0930 AI \u0917\u093e\u0907\u0921\u0947\u0902\u0938 \u092a\u093e\u090f\u0902\u0964",
+    questionLabel: (index) => `\u0938\u0935\u093e\u0932 ${index}`,
+    analyzing: "\u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0939\u094b \u0930\u0939\u093e \u0939\u0948...",
+    analyzeWithAi: "AI \u0938\u0947 \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0915\u0930\u0947\u0902",
+    backTo10thOptions: "\u0031\u0030\u0935\u0940\u0902 \u0915\u0947 \u0935\u093f\u0915\u0932\u094d\u092a\u094b\u0902 \u092a\u0930 \u0935\u093e\u092a\u0938 \u091c\u093e\u090f\u0902",
+    assessmentResultTitle: "AI \u0905\u0938\u0947\u0938\u092e\u0947\u0902\u091f \u092a\u0930\u093f\u0923\u093e\u092e",
+    bestFieldToChoose: "\u091a\u0941\u0928\u0928\u0947 \u0915\u0947 \u0932\u093f\u090f \u0938\u092c\u0938\u0947 \u0905\u091a\u094d\u091b\u093e \u0915\u094d\u0937\u0947\u0924\u094d\u0930",
+    chooseThisField: "\u0907\u0938 \u0915\u094d\u0937\u0947\u0924\u094d\u0930 \u0915\u094b \u091a\u0941\u0928\u0947\u0902",
+    durationLabel: "\u0905\u0935\u0927\u093f",
+    reportsSaved: (count) => `${count} \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0938\u0947\u0935 \u0939\u0948\u0902`,
+    deleteSavedReport: "\u0938\u0947\u0935 \u0915\u0940 \u0917\u0908 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0939\u091f\u093e\u090f\u0902",
+    openChat: "AI \u091a\u0948\u091f \u0916\u094b\u0932\u0947\u0902",
+    chatTooltip: "\u0905\u092a\u0928\u0947 \u0917\u094b\u0932\u094d\u0938 \u0914\u0930 \u090f\u091c\u0941\u0915\u0947\u0936\u0928 \u0915\u0947 \u0939\u093f\u0938\u093e\u092c \u0938\u0947 \u0917\u093e\u0907\u0921\u0947\u0902\u0938 \u092a\u093e\u090f\u0902",
+    answerAllQuestions:
+      "\u0915\u0943\u092a\u092f\u093e \u092a\u0939\u0932\u0947 \u0938\u092d\u0940 \u0905\u0938\u0947\u0938\u092e\u0947\u0902\u091f \u0938\u0935\u093e\u0932\u094b\u0902 \u0915\u093e \u091c\u0935\u093e\u092c \u0926\u0947\u0902\u0964",
+    deleteReportError:
+      "\u0905\u092d\u0940 \u0938\u0947\u0935 \u0915\u0940 \u0917\u0908 \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0939\u091f\u093e\u0908 \u0928\u0939\u0940\u0902 \u091c\u093e \u0938\u0915\u0940\u0964",
+    assessmentError:
+      "\u0905\u092d\u0940 \u0905\u0938\u0947\u0938\u092e\u0947\u0902\u091f \u0915\u093e \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0928\u0939\u0940\u0902 \u0939\u094b \u0938\u0915\u093e\u0964",
+  },
+  marathi: {
+    welcomeBack: (name) => `\u092a\u0941\u0928\u094d\u0939\u093e \u0938\u094d\u0935\u093e\u0917\u0924, ${name}`,
+    levelBadge: "\u0938\u094d\u0924\u0930",
+    assessmentTitle: "\u0938\u094d\u0915\u093f\u0932\u094d\u0938 \u0906\u0923\u093f \u0906\u0935\u0921 \u0905\u0938\u0947\u0938\u092e\u0947\u0902\u091f",
+    assessmentDescription:
+      "\u0939\u0947 \u0031\u0030 \u092a\u094d\u0930\u0936\u094d\u0928 \u0938\u094b\u0921\u0935\u093e \u0906\u0923\u093f \u0031\u0030\u0935\u0940\u0928\u0902\u0924\u0930\u091a\u094d\u092f\u093e \u0938\u0930\u094d\u0935\u093e\u0924 \u092f\u094b\u0917\u094d\u092f \u092a\u0930\u094d\u092f\u093e\u092f\u093e\u0902\u0938\u093e\u0920\u0940 AI \u092e\u093e\u0930\u094d\u0917\u0926\u0930\u094d\u0936\u0928 \u092e\u093f\u0933\u0935\u093e\u0964",
+    questionLabel: (index) => `\u092a\u094d\u0930\u0936\u094d\u0928 ${index}`,
+    analyzing: "\u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0938\u0941\u0930\u0942 \u0906\u0939\u0947...",
+    analyzeWithAi: "AI \u0928\u0947 \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0915\u0930\u093e",
+    backTo10thOptions: "\u0031\u0030\u0935\u0940\u0928\u0902\u0924\u0930\u091a\u094d\u092f\u093e \u092a\u0930\u094d\u092f\u093e\u092f\u093e\u0902\u0915\u0921\u0947 \u092a\u0930\u0924 \u091c\u093e",
+    assessmentResultTitle: "AI \u0905\u0938\u0947\u0938\u092e\u0947\u0902\u091f \u0928\u093f\u0915\u093e\u0932",
+    bestFieldToChoose: "\u0928\u093f\u0935\u0921\u0923\u094d\u092f\u093e\u0938\u093e\u0920\u0940 \u0938\u0930\u094d\u0935\u094b\u0924\u094d\u0924\u092e \u0915\u094d\u0937\u0947\u0924\u094d\u0930",
+    chooseThisField: "\u0939\u0947 \u0915\u094d\u0937\u0947\u0924\u094d\u0930 \u0928\u093f\u0935\u0921\u093e",
+    durationLabel: "\u0915\u093e\u0932\u093e\u0935\u0927\u0940",
+    reportsSaved: (count) => `${count} \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0938\u0947\u0935 \u0906\u0939\u0947\u0924`,
+    deleteSavedReport: "\u0938\u0947\u0935 \u0915\u0947\u0932\u0947\u0932\u093e \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0939\u091f\u0935\u093e",
+    openChat: "AI \u091a\u0948\u091f \u0909\u0918\u0921\u093e",
+    chatTooltip: "\u0924\u0941\u092e\u091a\u094d\u092f\u093e \u0917\u094b\u0932\u094d\u0938 \u0906\u0923\u093f \u0936\u093f\u0915\u094d\u0937\u0923\u093e\u0928\u0941\u0938\u093e\u0930 \u092e\u093e\u0930\u094d\u0917\u0926\u0930\u094d\u0936\u0928 \u092e\u093f\u0933\u0935\u093e",
+    answerAllQuestions:
+      "\u0915\u0943\u092a\u092f\u093e \u0906\u0927\u0940 \u0938\u0930\u094d\u0935 \u0905\u0938\u0947\u0938\u092e\u0947\u0902\u091f \u092a\u094d\u0930\u0936\u094d\u0928\u093e\u0902\u091a\u0940 \u0909\u0924\u094d\u0924\u0930\u0947 \u0926\u094d\u092f\u093e\u0964",
+    deleteReportError:
+      "\u0906\u0924\u094d\u0924\u093e \u0938\u0947\u0935 \u0915\u0947\u0932\u0947\u0932\u093e \u0930\u093f\u092a\u094b\u0930\u094d\u091f \u0939\u091f\u0935\u0924\u093e \u0906\u0932\u093e \u0928\u093e\u0939\u0940\u0964",
+    assessmentError:
+      "\u0906\u0924\u094d\u0924\u093e \u0905\u0938\u0947\u0938\u092e\u0947\u0902\u091f\u091a\u0947 \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0939\u094b\u090a \u0936\u0915\u0932\u0947 \u0928\u093e\u0939\u0940.",
+  },
+};
+
 export default function DashboardClient({
   initialReports,
   userName,
@@ -177,13 +275,10 @@ export default function DashboardClient({
   const language = parseLanguageCode(searchParams.get("lang")) ?? preferredLanguage;
 
   const t = getTranslation(language);
+  const ui = dashboardCopy[language];
   const displayName = userName?.trim() || "User";
   const selectedLevel = getLevelById(selection.levelId);
   const selectedPath = getPathById(selection.pathId);
-  const selectedSpecialization = getSpecializationById(
-    selection.pathId,
-    selection.specializationId,
-  );
 
   const availablePaths = useMemo(
     () => getPathsByLevel(selection.levelId),
@@ -321,7 +416,7 @@ export default function DashboardClient({
         setError(
           caughtError instanceof Error
             ? caughtError.message
-            : "Could not delete the saved report right now.",
+            : ui.deleteReportError,
         );
       }
     });
@@ -348,6 +443,8 @@ export default function DashboardClient({
         .join("\n");
 
       printWindow.document.open();
+      const isMobileViewport = window.matchMedia("(max-width: 768px)").matches;
+
       printWindow.document.write(`
         <!DOCTYPE html>
         <html lang="en">
@@ -385,6 +482,10 @@ export default function DashboardClient({
       `);
       printWindow.document.close();
       printWindow.focus();
+
+      if (isMobileViewport) {
+        return;
+      }
 
       window.setTimeout(() => {
         printWindow.print();
@@ -436,7 +537,7 @@ export default function DashboardClient({
 
   const submitAssessment = () => {
     if (assessmentQuestions.some((question) => !assessmentAnswers[question.id])) {
-      setError("Please answer all assessment questions first.");
+      setError(ui.answerAllQuestions);
       return;
     }
 
@@ -454,7 +555,7 @@ export default function DashboardClient({
         setError(
           caughtError instanceof Error
             ? caughtError.message
-            : "Could not analyze the assessment right now.",
+            : ui.assessmentError,
         );
       }
     });
@@ -495,7 +596,7 @@ export default function DashboardClient({
               className="flex w-full items-center gap-3 font-semibold rounded-xl px-2 py-2 text-left text-[16px] text-white transition-all duration-200 hover:bg-[#04b8b5] hover:text-white dark:text-white/80 dark:hover:bg-[#329d9c] dark:hover:text-slate-950"
             >
               <House className="h-5 w-5" />
-              <span>Home</span>
+              <span>{t.home}</span>
             </Link>
 
             <button
@@ -508,7 +609,7 @@ export default function DashboardClient({
               }`}
             >
               <LayoutDashboard size={16} />
-              <span>Dashboard</span>
+              <span>{t.dashboard}</span>
             </button>
 
             <button
@@ -521,7 +622,7 @@ export default function DashboardClient({
               }`}
             >
               <ReceiptText className="h-5 w-5" />
-              <span className={sidebarTab === "saved" ? "text-white" : ""}>Saved Reports</span>
+              <span className={sidebarTab === "saved" ? "text-white" : ""}>{t.savedReports}</span>
             </button>
 
           </div>
@@ -532,29 +633,31 @@ export default function DashboardClient({
             <form action={signOutToHome}>
               <button className="flex items-center gap-2 text-[17px] text-red-600 font-bold transition hover:opacity-90">
                 <LogOut className="h-6 w-6 text-red-600 font-bold dark:text-white" />
-                <span>Logout</span>
+                <span>{t.logout}</span>
               </button>
             </form>
           </div>
         </aside>
 
-        <section className="h-[calc(100vh-4.75rem)] min-h-0 overflow-y-auto px-5 py-5 md:px-7">
-          {showBack ? (
+        <section className="h-[calc(100vh-4.75rem)] min-h-0 overflow-y-auto px-5 py-1 md:px-7">
+          
+
+          <div className="min-h-full w-full rounded-none bg-[linear-gradient(180deg,#f5e7fa_0%,#efd9f7_45%,#ead0f6_100%)] p-2 shadow-[0_1px_0_rgba(15,23,42,0.06)] dark:bg-[linear-gradient(180deg,#150d1b_0%,#1c1024_48%,#140d1c_100%)] md:p-8">  
+            {/* I want here bg image */}
+              {showBack ? (
             <button
               type="button"
               onClick={handleBack}
               className="mb-3 inline-flex items-center text-pink-600 transition hover:opacity-80 dark:text-white"
-              aria-label="Go back"
+              aria-label={t.back}
             >
               <ArrowLeft className="h-5 w-5" strokeWidth={2.2} />
             </button>
           ) : null}
-
-          <div className="min-h-full w-full rounded-none bg-[linear-gradient(180deg,#f5e7fa_0%,#efd9f7_45%,#ead0f6_100%)] p-6 shadow-[0_1px_0_rgba(15,23,42,0.06)] dark:bg-[linear-gradient(180deg,#150d1b_0%,#1c1024_48%,#140d1c_100%)] md:p-8">
             {sidebarTab === "dashboard" && step === 1 ? (
               <div className="space-y-6">
                 <h1 className="text-4xl font-black text-[#111827] dark:text-white">
-                  Welcome back, {displayName}
+                  {ui.welcomeBack(displayName)}
                 </h1>
                 <PathSelector
                   items={careerLevels.map((level) => {
@@ -563,7 +666,7 @@ export default function DashboardClient({
                       id: level.id,
                       title: localized.label,
                       description: localized.description,
-                      badge: "Level",
+                      badge: ui.levelBadge,
                       icon: localized.shortLabel.slice(0, 2).toUpperCase(),
                     };
                   })}
@@ -578,10 +681,10 @@ export default function DashboardClient({
                 <div className="space-y-6">
                   <div className="rounded-none border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
                     <h2 className="text-3xl font-black text-[#111827] dark:text-white">
-                      Skills & Interest Assessment
+                      {ui.assessmentTitle}
                     </h2>
                     <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">
-                      Answer these 10 questions and get AI guidance for the best-fit 10th-standard options.
+                      {ui.assessmentDescription}
                     </p>
                   </div>
 
@@ -592,7 +695,7 @@ export default function DashboardClient({
                         className="rounded-[22px] border border-[#dfe5ef] bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
                       >
                         <p className="text-sm font-black uppercase tracking-[0.22em] text-slate-400">
-                          Question {index + 1}
+                          {ui.questionLabel(index + 1)}
                         </p>
                         <h3 className="mt-2 text-lg font-bold text-[#111827] dark:text-white">
                           {question.question}
@@ -610,10 +713,10 @@ export default function DashboardClient({
                                     [question.id]: option,
                                   }))
                                 }
-                                className={`rounded-[18px] border px-4 py-3 text-left text-sm font-medium transition ${
+                                className={`cursor-pointer rounded-[18px] border px-4 py-3 text-left text-sm font-medium transition ${
                                   selected
                                     ? "border-blue-400 bg-blue-50 text-blue-700 dark:border-sky-500 dark:bg-sky-950/40 dark:text-sky-300"
-                                    : "border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-300 hover:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+                                    : "border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-300 hover:bg-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
                                 }`}
                               >
                                 {option}
@@ -630,9 +733,9 @@ export default function DashboardClient({
                       type="button"
                       onClick={submitAssessment}
                       disabled={isAssessing}
-                      className="rounded-full bg-blue-600 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700 disabled:opacity-60"
+                      className="rounded-full bg-[#329d9c] px-6 py-3 text-sm font-bold text-white transition hover:bg-[#096d6b] disabled:opacity-60"
                     >
-                      {isAssessing ? "Analyzing..." : "Analyze with AI"}
+                      {isAssessing ? ui.analyzing : ui.analyzeWithAi}
                     </button>
                     <button
                       type="button"
@@ -641,20 +744,20 @@ export default function DashboardClient({
                         setAssessmentAnswers({});
                         setAssessmentResult(null);
                       }}
-                      className="rounded-full border border-slate-200 px-6 py-3 text-sm font-bold text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-slate-700 dark:text-slate-200"
+                      className="rounded-full border border-slate-200 px-6 py-3 text-sm font-bold text-slate-700 transition hover:border-blue-300 hover:bg-[#329d9c] dark:border-slate-700 dark:text-slate-200"
                     >
-                      Back to 10th options
+                      {ui.backTo10thOptions}
                     </button>
                   </div>
 
                   {assessmentResult ? (
                     <div className="rounded-[24px] border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
                       <h3 className="text-2xl font-black text-[#111827] dark:text-white">
-                        AI Assessment Result
+                        {ui.assessmentResultTitle}
                       </h3>
                       <div className="mt-4 rounded-[20px] border border-blue-200 bg-blue-50 p-5 dark:border-sky-800 dark:bg-sky-950/30">
                         <p className="text-xs font-black uppercase tracking-[0.24em] text-blue-600 dark:text-sky-300">
-                          Best Field To Choose
+                          {ui.bestFieldToChoose}
                         </p>
                         <p className="mt-2 text-xl font-black text-[#111827] dark:text-white">
                           {assessmentResult.primaryRecommendation.title}
@@ -668,9 +771,9 @@ export default function DashboardClient({
                             setShowAssessment(false);
                             handlePathSelect(assessmentResult.primaryRecommendation.pathId);
                           }}
-                          className="mt-4 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700"
+                          className="mt-4 rounded-full bg-[#329d9c] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#057472]"
                         >
-                          Choose this field
+                          {ui.chooseThisField}
                         </button>
                       </div>
                       <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
@@ -695,7 +798,7 @@ export default function DashboardClient({
                               setShowAssessment(false);
                               handlePathSelect(item.pathId);
                             }}
-                            className="rounded-[20px] border border-[#dfe5ef] bg-slate-50 p-5 text-left transition hover:border-blue-300 hover:bg-white dark:border-slate-700 dark:bg-slate-950"
+                            className="cursor-pointer rounded-[20px] border border-[#dfe5ef] bg-slate-50 p-5 text-left transition hover:border-blue-300 hover:bg-slate-800 dark:border-slate-700 dark:bg-slate-950"
                           >
                             <p className="text-lg font-black text-[#111827] dark:text-white">{item.title}</p>
                             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
@@ -717,10 +820,9 @@ export default function DashboardClient({
                       ? [
                           {
                             id: "skills-assessment-10th",
-                            title: "Skills & Interest Assessment",
-                            description:
-                              "Answer 10 questions and get AI guidance for the best-fit 10th-standard options.",
-                            badge: "Assessment",
+                            title: ui.assessmentTitle,
+                            description: ui.assessmentDescription,
+                            badge: ui.assessmentTitle,
                             icon: "AI",
                           },
                         ]
@@ -733,7 +835,7 @@ export default function DashboardClient({
                         description: path.description,
                         badge: selectedLevel
                           ? localizeCareerLevel(selectedLevel, language).label
-                          : "Level",
+                          : ui.levelBadge,
                         icon: localized.name.slice(0, 2).toUpperCase(),
                       };
                     }),
@@ -752,7 +854,7 @@ export default function DashboardClient({
                   return {
                     id: specialization.id,
                     title: localized.name,
-                    description: `${localized.focus}. Duration: ${specialization.duration}.`,
+                    description: `${localized.focus}. ${ui.durationLabel}: ${specialization.duration}.`,
                     badge: localizeCareerPath(selectedPath, language).name,
                     icon: localized.name.slice(0, 2).toUpperCase(),
                   };
@@ -766,9 +868,9 @@ export default function DashboardClient({
             {showSavedList ? (
               <div className="space-y-6">
                 <div className="rounded-[24px] border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-                  <h2 className="text-4xl font-black text-[#111827] dark:text-white">Saved Reports</h2>
+                  <h2 className="text-4xl font-black text-[#111827] dark:text-white">{t.savedReports}</h2>
                   <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-                    {reports.length} reports saved
+                    {ui.reportsSaved(reports.length)}
                   </p>
                 </div>
 
@@ -782,7 +884,7 @@ export default function DashboardClient({
                         <button
                           type="button"
                           onClick={() => openSavedReport(report)}
-                          className="flex-1 text-left"
+                          className="flex-1 cursor-pointer text-left"
                         >
                           <p className="text-2xl font-black text-[#111827] dark:text-white">
                             {report.specializationName}
@@ -801,8 +903,8 @@ export default function DashboardClient({
                           type="button"
                           onClick={() => handleDeleteReport(report._id)}
                           disabled={isDeleting}
-                          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-rose-200 text-rose-600 transition hover:bg-rose-50 disabled:opacity-60 dark:border-rose-900/50 dark:text-rose-300 dark:hover:bg-rose-950/30"
-                          aria-label="Delete saved report"
+                          className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-rose-200 text-rose-600 transition hover:bg-rose-50 disabled:opacity-60 dark:border-rose-900/50 dark:text-rose-300 dark:hover:bg-rose-950/30"
+                          aria-label={ui.deleteSavedReport}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -823,7 +925,7 @@ export default function DashboardClient({
                       type="button"
                       onClick={handleSaveReport}
                       disabled={isSaving}
-                      className="rounded-full bg-[#111827] px-5 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
+                      className="rounded-full bg-[#329d9c]  hover:bg-[#0d7271] cursor-pointer px-5 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"
                     >
                       {isSaving ? t.saving : t.saveReport}
                     </button>
@@ -847,7 +949,7 @@ export default function DashboardClient({
             {sidebarTab === "saved" && !reports.length ? (
               <div className="rounded-[24px] border border-dashed border-[#dfe5ef] bg-white p-7 text-center dark:border-slate-800 dark:bg-slate-900">
                 <p className="text-lg font-semibold text-slate-700 dark:text-slate-200">
-                  No saved reports yet
+                  {t.noSavedReports}
                 </p>
               </div>
             ) : null}
@@ -855,7 +957,7 @@ export default function DashboardClient({
             {sidebarTab === "chat" ? (
               <div className="space-y-3">
                
-                <CareerChatbot language={language} />
+                <CareerChatbot key={`dashboard-chat-${language}`} language={language} />
               </div>
             ) : null}
           </div>
@@ -864,13 +966,13 @@ export default function DashboardClient({
 
       <div className="group fixed right-5 top-1/2 z-40 -translate-y-1/2">
         <div className="pointer-events-none absolute right-16 top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-full bg-[#329d9c] px-4 py-2 text-sm font-semibold text-white opacity-0 shadow-lg transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 dark:bg-[#329d9c]">
-        Get guidance based on your goals and education
+          {ui.chatTooltip}
         </div>
         <button
           type="button"
           onClick={openChat}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-[#329d9c] text-white shadow-lg transition hover:scale-105 hover:opacity-95 dark:bg-slate-800 animate-pulse"
-          aria-label="Open AI chat"
+          className="flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-[#329d9c] text-white shadow-lg transition hover:scale-105 hover:opacity-95 dark:bg-slate-800 animate-pulse"
+          aria-label={ui.openChat}
         >
           <BotMascotIcon className="h-8 w-8" />
         </button>

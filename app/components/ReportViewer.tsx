@@ -6,7 +6,6 @@ import {
   IndianRupee,
   Lightbulb,
   Route,
-  Sparkles,
 } from "lucide-react";
 import { getTranslation } from "../../lib/i18n";
 import type { CareerReport, LanguageCode } from "../../types/career";
@@ -23,8 +22,8 @@ type ReportViewerProps = {
 
 function ListBlock({ title, items }: { title: string; items: string[] }) {
   return (
-    <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <h4 className="text-sm font-black uppercase tracking-[0.25em] text-slate-500 dark:text-slate-400">{title}</h4>
+    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <h4 className="text-sm font-black uppercase tracking-[0.25em] text-slate-700 dark:text-slate-400">{title}</h4>
       <div className="mt-4 flex flex-wrap gap-3">
         {items.map((item) => (
           <span
@@ -52,7 +51,7 @@ export default function ReportViewer({
 
   return (
     <div id="roadmap-print-root" className="space-y-6 print:space-y-4">
-      <section className="rounded-[36px] bg-[#1f011c] p-8 text-white shadow-xl dark:bg-slate-800 print:rounded-none print:bg-slate-950 print:p-0 print:shadow-none">
+      <section className="rounded-xl border border-blue-400 bg-linear-to-br from-sky-800 via-blue to-cyan-90 p-10 shadow-sm print:rounded-none print:bg-slate-950 print:p-0 print:shadow-none">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.35em] text-sky-300">
@@ -82,9 +81,9 @@ export default function ReportViewer({
               <button
                 type="button"
                 onClick={onExport}
-                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/20"
+                className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-10 py-2 text-sm font-bold text-[#5f034b] transition hover:bg-white/20"
               >
-                <Download size={16} />
+                <Download size={18}  />
                 <span>{t.exportPdf}</span>
               </button>
             ) : null}
@@ -93,7 +92,7 @@ export default function ReportViewer({
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr] print:grid-cols-1">
-        <section className="rounded-[30px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 print:break-inside-avoid print:rounded-[24px] print:shadow-none">
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 print:break-inside-avoid print:rounded-[24px] print:shadow-none">
           <div className="flex items-center gap-2 text-sky-700">
             <GraduationCap size={18} />
             <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{t.semesterBreakdown}</h3>
@@ -118,10 +117,10 @@ export default function ReportViewer({
         </section>
 
         <div className="space-y-6">
-          <section className="rounded-[30px] border border-emerald-100 bg-emerald-50 p-6 shadow-sm print:break-inside-avoid print:rounded-[24px] print:shadow-none">
+          <section className="rounded-xl border bg-[#f3f3f3] border-emerald-100 dark:bg-[#01012b] p-6 shadow-sm print:break-inside-avoid print:rounded-[24px] print:shadow-none">
             <div className="flex items-center gap-2 text-emerald-700">
-              <IndianRupee size={18} />
-              <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{t.feesAndSalary}</h3>
+              <IndianRupee size={21}   />
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">{t.feesAndSalary}</h3>
             </div>
             <div className="mt-5 space-y-4 text-sm text-slate-700 dark:text-slate-300">
               <div>
@@ -143,22 +142,22 @@ export default function ReportViewer({
             </div>
           </section>
 
-          <section className="rounded-[30px] border border-sky-100 bg-sky-50 p-6 shadow-sm print:break-inside-avoid print:rounded-[24px] print:shadow-none">
-            <div className="flex items-center gap-2 text-sky-700">
+          <section className="rounded-xl border bg-[#f3f3f3] border-sky-100 dark:bg-[#01102d] p-6 shadow-sm print:break-inside-avoid print:rounded-[24px] print:shadow-none">
+            <div className="flex items-center gap-2 text-gray-800">
               
-              <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{t.skillSynergy}</h3>
+              <h3 className="text-lg font-black text-black- dark:text-slate-100">{t.skillSynergy}</h3>
             </div>
-            <div className="mt-5 space-y-4 text-sm leading-7 text-slate-700 dark:text-slate-300">
+            <div className="mt-5 space-y-4 text-sm leading-7 text-gray-800 dark:text-slate-300">
               <div>
-                <p className="font-black text-slate-900 dark:text-slate-100">{t.frontend}</p>
+                <p className="font-black text-gray-800 dark:text-slate-100">{t.frontend}</p>
                 <p>{report.skill_synergy.frontend}</p>
               </div>
               <div>
-                <p className="font-black text-slate-900 dark:text-slate-100">{t.ai}</p>
+                <p className="font-black text-gray-800 dark:text-slate-100">{t.ai}</p>
                 <p>{report.skill_synergy.ai}</p>
               </div>
               <div>
-                <p className="font-black text-slate-900 dark:text-slate-100">{t.design}</p>
+                <p className="font-black text-gray-800 dark:text-slate-100">{t.design}</p>
                 <p>{report.skill_synergy.design}</p>
               </div>
             </div>
@@ -170,7 +169,7 @@ export default function ReportViewer({
       <ListBlock title={t.careerOpportunities} items={report.career_opportunities} />
       <ListBlock title={t.skillsRequired} items={report.skills_required} />
 
-      <section className="rounded-[28px] border border-amber-100 bg-amber-50 p-6 shadow-sm print:break-inside-avoid print:shadow-none">
+      <section className="rounded-xl border border-[#bdb5b5] bg-[#f9f9f9]  dark:bg-[#180128] p-6 shadow-sm print:break-inside-avoid print:shadow-none">
         <div className="flex items-center gap-2 text-amber-700">
           <Route size={18} />
           <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{t.growthPath}</h3>
@@ -187,7 +186,7 @@ export default function ReportViewer({
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 print:break-inside-avoid print:shadow-none">
+      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 print:break-inside-avoid print:shadow-none">
         <div className="flex items-center gap-2 text-violet-700">
           <Lightbulb size={18} />
           <h3 className="text-lg font-black text-slate-900 dark:text-slate-100">{t.howToUse}</h3>

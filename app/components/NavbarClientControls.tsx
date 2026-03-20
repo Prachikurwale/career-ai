@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Globe, LayoutDashboard, LogIn } from "lucide-react";
+import { Globe, LayoutDashboard } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageDropdown from "./LanguageDropdown";
 import { signInToDashboard } from "@/actions/auth";
-import { parseLanguageCode } from "@/lib/i18n";
+import { getTranslation, parseLanguageCode } from "@/lib/i18n";
 import type { LanguageCode } from "@/types/career";
 
 type NavbarClientControlsProps = {
@@ -22,6 +22,7 @@ export default function NavbarClientControls({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const language = parseLanguageCode(searchParams.get("lang")) ?? DEFAULT_LANGUAGE;
+  const t = getTranslation(language);
   const isHome = pathname === "/";
   const isDashboard = pathname === "/dashboard";
   const showLanguage = isLoggedIn && isDashboard;
@@ -45,7 +46,7 @@ export default function NavbarClientControls({
           className="inline-flex items-center gap-2 rounded-full bg-[#329d9c] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#108c8a]"
         >
           <LayoutDashboard size={16} />
-          <span>Dashboard</span>
+          <span>{t.dashboard}</span>
         </Link>
       ) : null}
 
@@ -63,16 +64,14 @@ export default function NavbarClientControls({
           href="/login"
           className="inline-flex items-center gap-2 rounded-full bg-[#329d9c] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#2a8483]"
         >
-           
-          <span>Login</span>
+          <span>{t.login}</span>
         </Link>
       ) : null}
 
       {!isLoggedIn && pathname === "/login" ? (
         <form action={signInToDashboard}>
           <button className="inline-flex items-center gap-2 rounded-full bg-[#329d9c] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#068582]">
-         
-            <span>Login</span>
+            <span>{t.login}</span>
           </button>
         </form>
       ) : null}

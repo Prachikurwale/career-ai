@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState, useTransition } from "react";
-import { Loader2, MessageSquare, Send, User } from "lucide-react";
+import { Loader2, Send, User } from "lucide-react";
 import { askCareerAssistant } from "../../actions/career-ai";
 import { getTranslation } from "../../lib/i18n";
 import type { LanguageCode } from "../../types/career";
@@ -15,18 +15,18 @@ type ChatMessage = {
 const starterPrompts: Record<LanguageCode, string[]> = {
   english: [
     "Which diploma is best after 10th for coding?",
-    "Compare ITI Electrician vs Diploma Mechanical in Maharashtra.",
-    "Suggest Nashik colleges for B.Sc IT after 12th.",
+    "Compare ITI Electrician and Diploma Mechanical near my location.",
+    "Suggest good colleges for B.Sc IT after 12th in my city.",
   ],
   hindi: [
-    "10वीं के बाद कोडिंग के लिए सबसे अच्छा डिप्लोमा कौन सा है?",
-    "महाराष्ट्र में ITI Electrician और Diploma Mechanical की तुलना करें।",
-    "12वीं के बाद B.Sc IT के लिए नाशिक के कॉलेज बताइए।",
+    "\u0031\u0030\u0935\u0940\u0902 \u0915\u0947 \u092c\u093e\u0926 \u0915\u094b\u0921\u093f\u0902\u0917 \u0915\u0947 \u0932\u093f\u090f \u0938\u092c\u0938\u0947 \u0905\u091a\u094d\u091b\u093e \u0921\u093f\u092a\u094d\u0932\u094b\u092e\u093e \u0915\u094c\u0928 \u0938\u093e \u0939\u0948?",
+    "\u092e\u0947\u0930\u0940 \u0932\u094b\u0915\u0947\u0936\u0928 \u0915\u0947 \u0906\u0938\u092a\u093e\u0938 ITI Electrician \u0914\u0930 Diploma Mechanical \u0915\u0940 \u0924\u0941\u0932\u0928\u093e \u0915\u0930\u094b\u0964",
+    "\u0031\u0032\u0935\u0940\u0902 \u0915\u0947 \u092c\u093e\u0926 B.Sc IT \u0915\u0947 \u0932\u093f\u090f \u092e\u0947\u0930\u0947 \u0936\u0939\u0930 \u092e\u0947\u0902 \u0905\u091a\u094d\u091b\u0947 \u0915\u0949\u0932\u0947\u091c \u0938\u0941\u091d\u093e\u090f\u0902\u0964",
   ],
   marathi: [
-    "10वी नंतर कोडिंगसाठी कोणता डिप्लोमा सर्वोत्तम आहे?",
-    "महाराष्ट्रात ITI Electrician आणि Diploma Mechanical यांची तुलना करा.",
-    "12वी नंतर B.Sc IT साठी नाशिकमधील कॉलेज सुचवा.",
+    "\u0031\u0030\u0935\u0940 \u0928\u0902\u0924\u0930 \u0915\u094b\u0921\u093f\u0902\u0917\u0938\u093e\u0920\u0940 \u0915\u094b\u0923\u0924\u093e \u0921\u093f\u092a\u094d\u0932\u094b\u092e\u093e \u0938\u0930\u094d\u0935\u094b\u0924\u094d\u0924\u092e \u0906\u0939\u0947?",
+    "\u092e\u093e\u091d\u094d\u092f\u093e \u0932\u094b\u0915\u0947\u0936\u0928\u091c\u0935\u0933 ITI Electrician \u0906\u0923\u093f Diploma Mechanical \u092f\u093e\u0902\u091a\u0940 \u0924\u0941\u0932\u0928\u093e \u0915\u0930\u093e.",
+    "\u0031\u0032\u0935\u0940 \u0928\u0902\u0924\u0930 B.Sc IT \u0938\u093e\u0920\u0940 \u092e\u093e\u091d\u094d\u092f\u093e \u0936\u0939\u0930\u093e\u0924 \u091a\u093e\u0902\u0917\u0932\u0940 \u0915\u0949\u0932\u0947\u091c \u0938\u0941\u091a\u0935\u093e.",
   ],
 };
 
@@ -93,7 +93,9 @@ export default function CareerChatbot({
           >
             {t.chatTitle}
           </h2>
-          <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">{t.chatDescription}</p>
+          <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
+            {t.chatDescription}
+          </p>
         </div>
 
         <div className="rounded-2xl bg-[#329d9c] px-4 py-3 text-sm font-semibold text-white">
@@ -108,7 +110,7 @@ export default function CareerChatbot({
             type="button"
             onClick={() => submitQuestion(prompt)}
             disabled={isPending}
-            className="rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            className="cursor-pointer rounded-full border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {prompt}
           </button>
@@ -116,50 +118,56 @@ export default function CareerChatbot({
       </div>
 
       <div
-        className={`mt-6 space-y-4 rounded-[28px] bg-slate-50 p-4 dark:bg-[#329d9c] ${
+        className={`mt-6 space-y-4 rounded-[28px] bg-slate-50 p-4 dark:bg-[#20002a] ${
           compact ? "max-h-85 overflow-y-auto" : "md:p-5"
         }`}
       >
-        {messages.map((message, index) => {
-          const isAssistant = message.role === "assistant";
+       {messages.map((message, index) => {
+  const isAssistant = message.role === "assistant";
 
-          return (
-            <article
-              key={`${message.role}-${index}`}
-              className={`flex gap-3 ${isAssistant ? "justify-start" : "justify-end"}`}
-            >
-              {isAssistant ? (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl bg-[#329d9c] text-white">
-                  <BotMascotIcon className="h-6 w-6" />
-                </div>
-              ) : null}
+  return (
+    <article
+      key={`${message.role}-${index}`}
+      className={`flex gap-3 ${isAssistant ? "justify-start" : "justify-end"} items-end`}
+    >
+     
+      {isAssistant && (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-3xl bg-[#329d9c] text-white shadow-sm mb-1">
+          <BotMascotIcon className="h-6 w-6" />
+        </div>
+      )}
 
-              <div
-                className={`max-w-3xl rounded-3xl px-4 py-3 ${
-                  isAssistant
-                    ? "border border-blue-100 bg-white text-slate-700 dark:border-slate-700 dark:bg-[#329d9c] dark:text-slate-200"
-                    : "bg-[#dcc3eb] text-black dark:bg-[#deb6fb]"
-                }`}
-              >
-                <div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] opacity-70">
-                  {isAssistant ? <BotMascotIcon className="h-4 w-4" /> : <User size={14} />}
-                  <span>{isAssistant ? t.aiCounselor : t.you}</span>
-                </div>
-                <div className="space-y-2 text-sm leading-7">
-                  {message.content.split("\n").map((line, lineIndex) => (
-                    <p key={`${index}-${lineIndex}`}>{line || "\u00A0"}</p>
-                  ))}
-                </div>
-              </div>
+      
+      <div
+        className={`max-w-[75%] md:max-w-2xl rounded-[24px] px-5 py-3 shadow-sm ${
+          isAssistant
+            ? "border border-blue-100 bg-white text-slate-700 dark:border-slate-700 dark:bg-[#034746] dark:text-slate-200 rounded-bl-none"
+            : "bg-[#dcc3eb] text-black dark:text-white dark:bg-[#2a0123] rounded-br-none"
+        }`}
+      >
+       
+        {isAssistant && (
+          <div className="mb-1.5 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] opacity-60">
+          </div>
+        )}
 
-              {!isAssistant ? (
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                  <User size={18} />
-                </div>
-              ) : null}
-            </article>
-          );
-        })}
+      
+        <div className="space-y-2 text-sm leading-relaxed">
+          {message.content.split("\n").map((line, lineIndex) => (
+            <p key={`${index}-${lineIndex}`}>{line || "\u00A0"}</p>
+          ))}
+        </div>
+      </div>
+
+    
+      {!isAssistant && (
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200 mb-1 shadow-sm">
+          <User size={20} />
+        </div>
+      )}
+    </article>
+  );
+})}
 
         {isPending ? (
           <div className="flex items-center gap-3 rounded-3xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
@@ -175,7 +183,6 @@ export default function CareerChatbot({
         </label>
         <div className="flex flex-col gap-3 md:flex-row">
           <div className="relative flex-1">
-             
             <input
               id="career-chatbot-input"
               value={input}
@@ -188,7 +195,7 @@ export default function CareerChatbot({
           <button
             type="submit"
             disabled={isPending || !input.trim()}
-            className="inline-flex items-center justify-center  rounded-4xl bg-[#329d9c] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#178f8d] disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="inline-flex items-center justify-center rounded-4xl bg-[#329d9c] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#178f8d] disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             {isPending ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
             <span>{t.send}</span>

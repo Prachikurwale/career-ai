@@ -88,7 +88,7 @@ function DrilldownTree({ bullets }: { bullets: string[] }) {
       </div>
 
       {currentLabel ? (
-        <div className="rounded-[24px] border border-blue-100 bg-blue-50 px-5 py-4 text-sm leading-7 text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+        <div className="rounded-3xl border border-blue-100 bg-blue-50 px-5 py-4 text-sm leading-7 text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
           <span className="font-black text-blue-700 dark:text-sky-300">Current:</span> {currentLabel}
         </div>
       ) : null}
@@ -186,7 +186,7 @@ export default function CareerChartExplorer({
                 key={section.id}
                 type="button"
                 onClick={() => setActiveId(section.id)}
-                className={`flex w-full items-center gap-3 rounded-[24px] px-4 py-4 text-left transition ${
+                className={`flex w-full items-center gap-3 rounded-3xl px-4 py-4 text-left transition ${
                   isActive
                     ? "bg-blue-600 text-white shadow-lg"
                     : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-300 hover:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
@@ -212,7 +212,7 @@ export default function CareerChartExplorer({
           <button
             type="button"
             onClick={() => setActiveId("glossary")}
-            className={`flex w-full items-center gap-3 rounded-[24px] px-4 py-4 text-left transition ${
+            className={`flex w-full items-center gap-3 rounded-3xl px-4 py-4 text-left transition ${
               activeId === "glossary"
                 ? "bg-fuchsia-600 text-white shadow-lg"
                 : "border border-slate-200 bg-slate-50 text-slate-700 hover:border-fuchsia-300 hover:bg-white dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200"
@@ -236,7 +236,7 @@ export default function CareerChartExplorer({
       </aside>
 
       <section className="space-y-6">
-        <div className="rounded-[36px] bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 p-8 text-white shadow-xl">
+        <div className="rounded-[36px] bg-linear-to-br from-slate-950 via-blue-950 to-slate-900 p-8 text-white shadow-xl">
           <div className="flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-3xl bg-white/10">
               <ScrollText size={24} />

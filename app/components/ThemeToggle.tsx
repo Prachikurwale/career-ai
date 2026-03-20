@@ -16,13 +16,10 @@ export default function ThemeToggle() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       const savedTheme = window.localStorage.getItem("theme");
-      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
       const nextTheme =
         savedTheme === "dark" || savedTheme === "light"
           ? (savedTheme as ThemeMode)
-          : systemPrefersDark
-            ? "dark"
-            : "light";
+          : "light";
 
       setTheme(nextTheme);
       applyTheme(nextTheme);

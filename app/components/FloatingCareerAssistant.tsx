@@ -33,7 +33,7 @@ export default function FloatingCareerAssistant({
               <X size={16} />
             </button>
           </div>
-          <CareerChatbot language={language} compact />
+          <CareerChatbot key={`floating-chat-${language}`} language={language} compact />
         </div>
       ) : null}
 

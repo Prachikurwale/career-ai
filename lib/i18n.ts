@@ -401,6 +401,7 @@ export function localizeCareerPath(path: CareerPath, language: LanguageCode) {
   return {
     ...path,
     name: careerLabelTranslations[path.id]?.[language] ?? path.name,
+    description: careerDescriptionTranslations[path.id]?.[language] ?? path.description,
   };
 }
 
