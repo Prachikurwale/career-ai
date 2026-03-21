@@ -679,7 +679,7 @@ export default function DashboardClient({
             {sidebarTab === "dashboard" && step === 2 ? (
               showAssessment && selection.levelId === "10th" ? (
                 <div className="space-y-6">
-                  <div className="rounded-none border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                  <div className="rounded-[10px] border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
                     <h2 className="text-3xl font-black text-[#111827] dark:text-white">
                       {ui.assessmentTitle}
                     </h2>
@@ -692,7 +692,7 @@ export default function DashboardClient({
                     {assessmentQuestions.map((question, index) => (
                       <div
                         key={question.id}
-                        className="rounded-[22px] border border-[#dfe5ef] bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
+                        className="rounded-[10px] border border-[#dfe5ef] bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
                       >
                         <p className="text-sm font-black uppercase tracking-[0.22em] text-slate-400">
                           {ui.questionLabel(index + 1)}
@@ -716,7 +716,7 @@ export default function DashboardClient({
                                 className={`cursor-pointer rounded-[18px] border px-4 py-3 text-left text-sm font-medium transition ${
                                   selected
                                     ? "border-blue-400 bg-blue-50 text-blue-700 dark:border-sky-500 dark:bg-sky-950/40 dark:text-sky-300"
-                                    : "border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-300 hover:bg-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
+                                    : "border-slate-200 bg-slate-50 text-slate-700 hover:border-blue-300 dark:hover:bg-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300"
                                 }`}
                               >
                                 {option}
@@ -751,7 +751,7 @@ export default function DashboardClient({
                   </div>
 
                   {assessmentResult ? (
-                    <div className="rounded-[24px] border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+                    <div className="rounded-xl border border-[#dfe5ef] bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
                       <h3 className="text-2xl font-black text-[#111827] dark:text-white">
                         {ui.assessmentResultTitle}
                       </h3>
