@@ -6,6 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
+  Globe,
   House,
   LayoutDashboard,
   LogOut,
@@ -17,6 +18,9 @@ import CareerChatbot from "./CareerChatbot";
 import LoadingScreen from "./LoadingScreen";
 import PathSelector from "./PathSelector";
 import ReportViewer from "./ReportViewer";
+import ThemeToggle from "./ThemeToggle";
+import LanguageDropdown from "./LanguageDropdown";
+import { useMobileMenu } from "./MobileMenuContext";
 import {
   careerLevels,
   getLevelById,
@@ -248,6 +252,7 @@ export default function DashboardClient({
   const searchParams = useSearchParams();
   const [preferredLanguage, setPreferredLanguage] = useState<LanguageCode>(initialLanguage);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const { isSidebarOpen, setIsSidebarOpen } = useMobileMenu();
   const [selection, setSelection] = useState<SelectionState>({
     levelId: "",
     pathId: "",
@@ -289,6 +294,7 @@ export default function DashboardClient({
   const visibleReport = generatedReport ?? activeSavedReport?.report ?? null;
   const showSavedList = sidebarTab === "saved" && !activeSavedId && !generatedReport;
   const showReport = step === 4 && Boolean(visibleReport);
+  const showLanguage = true; // Always show in dashboard sidebar
   const showBack =
     step > 1 || sidebarTab === "saved" || sidebarTab === "chat" || activeSavedId !== null || showAssessment;
 
@@ -310,6 +316,7 @@ export default function DashboardClient({
     setAssessmentResult(null);
     setSelection({ levelId: "", pathId: "", specializationId: "" });
     setStep(1);
+    setIsSidebarOpen(false);
   };
 
   const openSavedReports = () => {
@@ -318,6 +325,7 @@ export default function DashboardClient({
     setActiveSavedId(null);
     setError(null);
     setStep(4);
+    setIsSidebarOpen(false);
   };
 
   const openChat = () => {
@@ -326,6 +334,7 @@ export default function DashboardClient({
     setActiveSavedId(null);
     setError(null);
     setShowAssessment(false);
+    setIsSidebarOpen(false);
   };
 
   const handleLevelSelect = (levelId: string) => {
@@ -562,9 +571,143 @@ export default function DashboardClient({
   };
 
   return (
-    <div className="h-[calc(100vh-4.75rem)] overflow-hidden bg-[radial-gradient(circle_at_bottom_right,_rgba(216,180,254,0.18),_transparent_30%),linear-gradient(180deg,#f5e7fa_0%,#efd9f7_45%,#ead0f6_100%)] dark:bg-[radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.08),_transparent_30%),linear-gradient(180deg,#150d1b_0%,#1c1024_48%,#140d1c_100%)]">
+    <div className="relative h-[calc(100vh-4.75rem)] overflow-hidden bg-[radial-gradient(circle_at_bottom_right,_rgba(216,180,254,0.18),_transparent_30%),linear-gradient(180deg,#f5e7fa_0%,#efd9f7_45%,#ead0f6_100%)] dark:bg-[radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.08),_transparent_30%),linear-gradient(180deg,#150d1b_0%,#1c1024_48%,#140d1c_100%)]">
+      {/* Mobile Menu Overlay & Drawer */}
+      {isSidebarOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+
+          <div className="fixed inset-0 top-[4.75rem] z-50 md:hidden">
+            {/* Menu Panel */}
+            <div className="absolute right-0 top-0 h-full w-72 bg-[#0a7b81] dark:bg-[#0f5d61] overflow-y-auto flex flex-col shadow-xl">
+              {/* User Profile Section */}
+              <div className="flex flex-col items-center p-6 border-b border-black/20 dark:border-white/20">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-white shadow-lg">
+                  {userImage ? (
+                    <Image
+                      src={userImage}
+                      alt={displayName}
+                      width={78}
+                      height={78}
+                      priority={false}
+                      loading="lazy"
+                      unoptimized
+                      className="h-full w-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center rounded-full bg-slate-200 text-3xl font-black text-slate-600">
+                      {displayName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <p className="mt-4 text-center text-lg font-bold text-white">
+                  {displayName}
+                </p>
+                <p className="mt-1 text-center text-sm text-white/90">
+                  {userEmail}
+                </p>
+              </div>
+
+              {/* Menu Items */}
+              <div className="flex-1 space-y-2 p-4">
+                {/* Language Dropdown - Mobile */}
+                {showLanguage ? (
+                  <div className="mb-4 rounded-lg bg-white/20 p-3">
+                    <div className="flex items-center gap-2 text-white text-sm font-semibold mb-2">
+                      <Globe className="h-4 w-4" />
+                      <span>Language</span>
+                    </div>
+                    <div className="flex items-center gap-1 rounded-full border border-white/30 bg-white/10 px-2 py-1.5">
+                      <LanguageDropdown value={language} onChange={(lang) => {
+                        const params = new URLSearchParams(searchParams.toString());
+                        params.set("lang", lang);
+                        window.localStorage.setItem("career-ai-language", lang);
+                        router.replace(params.toString() ? `${pathname}?${params.toString()}` : pathname, {
+                          scroll: false,
+                        });
+                      }} />
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Dark/Light Toggle - Mobile */}
+                <div className="mb-4 rounded-lg bg-white/20 p-3 flex items-center justify-between">
+                  <span className="text-white text-sm font-semibold">Dark Mode</span>
+                  <ThemeToggle />
+                </div>
+
+                {/* Home Button */}
+                <Link
+                  href="/"
+                  className="flex w-full items-center gap-3 font-semibold rounded-lg px-4 py-3 text-white transition-all duration-200 hover:bg-[#04b8b5] dark:hover:bg-[#329d9c]"
+                >
+                  <House className="h-5 w-5" />
+                  <span>{t.home}</span>
+                </Link>
+
+                {/* Dashboard Button */}
+                <button
+                  type="button"
+                  onClick={resetToDashboard}
+                  className={`flex w-full items-center gap-3 font-semibold rounded-lg px-4 py-3 text-white transition-all duration-200 ${
+                    sidebarTab === "dashboard"
+                      ? "bg-white/25 dark:bg-white/15"
+                      : "hover:bg-[#04b8b5] dark:hover:bg-[#329d9c]"
+                  }`}
+                >
+                  <LayoutDashboard size={20} />
+                  <span>{t.dashboard}</span>
+                </button>
+
+                {/* Saved Reports Button */}
+                <button
+                  type="button"
+                  onClick={openSavedReports}
+                  className={`flex w-full items-center gap-3 font-semibold rounded-lg px-4 py-3 text-white transition-all duration-200 ${
+                    sidebarTab === "saved"
+                      ? "bg-white/25 dark:bg-white/15"
+                      : "hover:bg-[#04b8b5] dark:hover:bg-[#329d9c]"
+                  }`}
+                >
+                  <ReceiptText className="h-5 w-5" />
+                  <span>{t.savedReports}</span>
+                </button>
+
+                {/* Chat Button */}
+                <button
+                  type="button"
+                  onClick={openChat}
+                  className={`flex w-full items-center gap-3 font-semibold rounded-lg px-4 py-3 text-white transition-all duration-200 ${
+                    sidebarTab === "chat"
+                      ? "bg-white/25 dark:bg-white/15"
+                      : "hover:bg-[#04b8b5] dark:hover:bg-[#329d9c]"
+                  }`}
+                >
+                  <BotMascotIcon className="h-5 w-5" />
+                  <span>{ui.openChat}</span>
+                </button>
+              </div>
+
+              {/* Logout Section */}
+              <div className="border-t border-white/30 p-4">
+                <form action={signOutToHome}>
+                  <button className="flex w-full items-center gap-3 text-lg font-bold text-red-500 transition hover:opacity-80">
+                    <LogOut className="h-6 w-6" />
+                    <span>{t.logout}</span>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
       <div className="grid h-[calc(100vh-4.75rem)] min-h-0 items-stretch md:grid-cols-[290px_minmax(0,1fr)]">
-        <aside className="flex h-full min-h-0 flex-col overflow-y-auto border-r border-black/10 bg-[#0a7b81] px-4 py-4 dark:border-white/10 dark:bg-[#0f5d61] ">
+        {/* Desktop Sidebar - Keep original */}
+        <aside className="hidden md:flex h-full w-80 min-h-0 flex-col overflow-y-auto border-r border-black/10 bg-[#0a7b81] px-4 py-4 dark:border-white/10 dark:bg-[#0f5d61]">
           <div className="flex flex-col items-center">
             {userImage ? (
               <Image
@@ -572,10 +715,13 @@ export default function DashboardClient({
                 alt={displayName}
                 width={67}
                 height={67}
-                className="h-[67px] w-[67px] rounded-full   object-cover dark:border-white"
+                priority={false}
+                loading="lazy"
+                unoptimized
+                className="h-16.75 w-16.75 rounded-full object-cover shadow-md dark:border-white"
               />
             ) : (
-              <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full border-2 border-black bg-white text-2xl font-black text-white dark:border-white dark:bg-slate-800 dark:text-white">
+              <div className="flex h-18 w-18 items-center justify-center rounded-full border-2 border-black bg-white text-2xl font-black shadow-md text-white dark:border-white dark:bg-slate-800 dark:text-white">
                 {displayName.charAt(0).toUpperCase()}
               </div>
             )}
@@ -964,7 +1110,7 @@ export default function DashboardClient({
         </section>
       </div>
 
-      <div className="group fixed right-5 top-1/2 z-40 -translate-y-1/2">
+      <div className="group fixed right-5 top-1/2 -translate-y-1/2" style={{ zIndex: isSidebarOpen ? 20 : 40 }}>
         <div className="pointer-events-none absolute right-16 top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-full bg-[#329d9c] px-4 py-2 text-sm font-semibold text-white opacity-0 shadow-lg transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 dark:bg-[#329d9c]">
           {ui.chatTooltip}
         </div>

@@ -19,10 +19,10 @@ export default function LanguageDropdown({
       value={value}
       onChange={(event) => onChange(event.target.value as LanguageCode)}
       aria-label="Select language"
-      className={`rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 ${className}`.trim()}
+      className={`bg-transparent border-0 text-sm font-semibold text-slate-700 dark:text-slate-200 outline-none cursor-pointer px-2 py-1 rounded transition ${className}`.trim()}
     >
       {languageOptions.map((option) => (
-        <option key={option.id} value={option.id}>
+        <option key={option.id} value={option.id} className="text-slate-900 dark:text-slate-100">
           {option.nativeLabel}
         </option>
       ))}

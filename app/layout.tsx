@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import { Providers } from "./components/Providers";
+import { MobileMenuProvider } from "./components/MobileMenuContext";
 
 export const metadata: Metadata = {
   title: "Dream Route",
@@ -18,8 +19,10 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <Providers>
-          <Navbar />
-          {children}
+          <MobileMenuProvider>
+            <Navbar />
+            {children}
+          </MobileMenuProvider>
         </Providers>
          
       </body>
