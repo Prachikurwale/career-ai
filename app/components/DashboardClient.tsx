@@ -572,7 +572,7 @@ export default function DashboardClient({
 
   return (
     <div className="relative h-[calc(100vh-4.75rem)] overflow-hidden bg-[radial-gradient(circle_at_bottom_right,_rgba(216,180,254,0.18),_transparent_30%),linear-gradient(180deg,#f5e7fa_0%,#efd9f7_45%,#ead0f6_100%)] dark:bg-[radial-gradient(circle_at_bottom_right,_rgba(59,130,246,0.08),_transparent_30%),linear-gradient(180deg,#150d1b_0%,#1c1024_48%,#140d1c_100%)]">
-      {/* Mobile Menu Overlay & Drawer */}
+     
       {isSidebarOpen && (
         <>
           <div
@@ -581,11 +581,11 @@ export default function DashboardClient({
           />
 
           <div className="fixed inset-0 top-[4.75rem] z-50 md:hidden">
-            {/* Menu Panel */}
+           
             <div className="absolute right-0 top-0 h-full w-72 bg-[#0a7b81] dark:bg-[#0f5d61] overflow-y-auto flex flex-col shadow-xl">
-              {/* User Profile Section */}
+             
               <div className="flex flex-col items-center p-6 border-b border-black/20 dark:border-white/20">
-                <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-white shadow-lg">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full  bg-white shadow-lg">
                   {userImage ? (
                     <Image
                       src={userImage}
@@ -611,9 +611,9 @@ export default function DashboardClient({
                 </p>
               </div>
 
-              {/* Menu Items */}
+            
               <div className="flex-1 space-y-2 p-4">
-                {/* Language Dropdown - Mobile */}
+                
                 {showLanguage ? (
                   <div className="mb-4 rounded-lg bg-white/20 p-3">
                     <div className="flex items-center gap-2 text-white text-sm font-semibold mb-2">
@@ -633,13 +633,13 @@ export default function DashboardClient({
                   </div>
                 ) : null}
 
-                {/* Dark/Light Toggle - Mobile */}
+                
                 <div className="mb-4 rounded-lg bg-white/20 p-3 flex items-center justify-between">
                   <span className="text-white text-sm font-semibold">Dark Mode</span>
                   <ThemeToggle />
                 </div>
 
-                {/* Home Button */}
+             
                 <Link
                   href="/"
                   className="flex w-full items-center gap-3 font-semibold rounded-lg px-4 py-3 text-white transition-all duration-200 hover:bg-[#04b8b5] dark:hover:bg-[#329d9c]"
@@ -648,7 +648,7 @@ export default function DashboardClient({
                   <span>{t.home}</span>
                 </Link>
 
-                {/* Dashboard Button */}
+            
                 <button
                   type="button"
                   onClick={resetToDashboard}
@@ -662,7 +662,7 @@ export default function DashboardClient({
                   <span>{t.dashboard}</span>
                 </button>
 
-                {/* Saved Reports Button */}
+                
                 <button
                   type="button"
                   onClick={openSavedReports}
@@ -676,7 +676,7 @@ export default function DashboardClient({
                   <span>{t.savedReports}</span>
                 </button>
 
-                {/* Chat Button */}
+               
                 <button
                   type="button"
                   onClick={openChat}
@@ -691,7 +691,7 @@ export default function DashboardClient({
                 </button>
               </div>
 
-              {/* Logout Section */}
+              
               <div className="border-t border-white/30 p-4">
                 <form action={signOutToHome}>
                   <button className="flex w-full items-center gap-3 text-lg font-bold text-red-500 transition hover:opacity-80">
@@ -706,7 +706,7 @@ export default function DashboardClient({
       )}
 
       <div className="grid h-[calc(100vh-4.75rem)] min-h-0 items-stretch md:grid-cols-[290px_minmax(0,1fr)]">
-        {/* Desktop Sidebar - Keep original */}
+         
         <aside className="hidden md:flex h-full w-80 min-h-0 flex-col overflow-y-auto border-r border-black/10 bg-[#0a7b81] px-4 py-4 dark:border-white/10 dark:bg-[#0f5d61]">
           <div className="flex flex-col items-center">
             {userImage ? (
