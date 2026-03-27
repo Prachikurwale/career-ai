@@ -6,7 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
-  Globe,
+  Languages,
   House,
   LayoutDashboard,
   LogOut,
@@ -584,7 +584,7 @@ export default function DashboardClient({
            
             <div className="absolute right-0 top-0 h-full w-72 bg-[#0a7b81] dark:bg-[#0f5d61] overflow-y-auto flex flex-col shadow-xl">
              
-              <div className="flex flex-col items-center p-6 border-b border-black/20 dark:border-white/20">
+              <div className="flex flex-col items-center p-6 border-b border-white/20 dark:border-white/20">
                 <div className="flex h-24 w-24 items-center justify-center rounded-full  bg-white shadow-lg">
                   {userImage ? (
                     <Image
@@ -617,7 +617,7 @@ export default function DashboardClient({
                 {showLanguage ? (
                   <div className="mb-4 rounded-lg bg-white/20 p-3">
                     <div className="flex items-center gap-2 text-white text-sm font-semibold mb-2">
-                      <Globe className="h-4 w-4" />
+                      <Languages className="h-5 w-5" />
                       <span>Language</span>
                     </div>
                     <div className="flex items-center gap-1 rounded-full border border-white/30 bg-white/10 px-2 py-1.5">
@@ -733,7 +733,7 @@ export default function DashboardClient({
                 {userEmail}
               </p>
             ) : null}
-            <div className="mt-3 w-full border-t border-black/40 dark:border-white/40" />
+            <div className="mt-3 w-full border-t border-white/40 dark:border-white/40" />
           </div>
 
           <div className="mt-8 space-y-3">
@@ -788,9 +788,9 @@ export default function DashboardClient({
         <section className="h-[calc(100vh-4.75rem)] min-h-0 overflow-y-auto px-5 py-1 md:px-7">
           
 
-          <div className="min-h-full w-full rounded-none bg-[linear-gradient(180deg,#f5e7fa_0%,#efd9f7_45%,#ead0f6_100%)] p-2 shadow-[0_1px_0_rgba(15,23,42,0.06)] dark:bg-[linear-gradient(180deg,#150d1b_0%,#1c1024_48%,#140d1c_100%)] md:p-8">  
-            {/* I want here bg image */}
-              {showBack ? (
+          <div className="min-h-full w-full rounded-none     dark:bg-[linear-gradient(180deg,#150d1b_0%,#1c1024_48%,#140d1c_100%)] md:p-8">  
+            
+              {showBack && sidebarTab !== "chat" ? (
             <button
               type="button"
               onClick={handleBack}
@@ -1101,7 +1101,7 @@ export default function DashboardClient({
             ) : null}
 
             {sidebarTab === "chat" ? (
-              <div className="space-y-3">
+              <div className="w-full   space-y-3">
                
                 <CareerChatbot key={`dashboard-chat-${language}`} language={language} />
               </div>

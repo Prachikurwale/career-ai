@@ -137,7 +137,7 @@ function DrilldownTree({ bullets }: { bullets: string[] }) {
 
 function GlossaryTable({ glossary }: { glossary: CareerChartGlossaryItem[] }) {
   return (
-    <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white  dark:border-slate-800 dark:bg-slate-900">
       <div className="grid grid-cols-[minmax(120px,0.7fr)_minmax(0,2fr)] border-b border-slate-200 bg-slate-50 px-5 py-4 text-xs font-black uppercase tracking-[0.24em] text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
         <span>Shortform</span>
         <span>Meaning</span>

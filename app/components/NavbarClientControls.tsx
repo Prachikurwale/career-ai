@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Globe, LayoutDashboard, Menu, X } from "lucide-react";
+import { Languages, LayoutDashboard, Menu, X } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import LanguageDropdown from "./LanguageDropdown";
 import { signInToDashboard } from "@/actions/auth";
@@ -66,9 +66,9 @@ export default function NavbarClientControls({
         ) : null}
 
         {showLanguage ? (
-          <div className="hidden md:flex items-center gap-1 rounded-full border border-slate-300 bg-white px-2 py-1.5 dark:border-slate-700 dark:bg-slate-900">
-            <Globe className="h-5 w-5 text-pink-500 dark:text-slate-300 ml-1" />
-            <LanguageDropdown value={language} onChange={updateLanguage} />
+          <div className="hidden md:flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 dark:border-slate-700 dark:bg-slate-900">
+            <Languages className="h-7 w-7 text-pink-500 dark:text-slate-300" />
+            <LanguageDropdown value={language} onChange={updateLanguage}   />
           </div>
         ) : null}
 
